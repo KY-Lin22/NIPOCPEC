@@ -149,7 +149,7 @@ solver.Option.Tolerance.KKT_Error_Feasibility = 1e-1;
 solver.Option.Tolerance.KKT_Error_Stationarity = 1e-1;
 
 solver.Option.RegularParam.nu_J = 1e-7;
-solver.Option.RegularParam.nu_G = 1e-7;
+solver.Option.RegularParam.nu_G = 1e-6;
 solver.Option.RegularParam.nu_H = 0;
 
 solver.Option.LineSearch.stepSize_Min = 0.01;
