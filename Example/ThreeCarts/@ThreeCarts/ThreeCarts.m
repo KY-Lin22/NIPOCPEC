@@ -39,7 +39,7 @@ classdef ThreeCarts < DifferentialVariationalInequalities
             plant.DynVarLimit.x_Max = [10; 15; 15; 5; 5; 5]; 
             plant.DynVarLimit.x_Min = [-15; -15; -10; -5; -5; -5];            
             
-            % initial other properties
+            % initialize other properties
             if nargin ~= 0
                 if ~isempty(timeStep)
                     plant.timeStep = timeStep;

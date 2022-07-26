@@ -38,7 +38,7 @@ classdef Hopper < DifferentialVariationalInequalities
             plant.DynVarLimit.x_Max = [2; 2; pi; 0.5; 10; 10; 5; 5]; 
             plant.DynVarLimit.x_Min = [0; 0; -pi; 0.1; -10; -10; -5; -5];   
             
-            % initial other properties
+            % initialize other properties
             if nargin ~= 0
                 if ~isempty(timeStep)
                     plant.timeStep = timeStep;

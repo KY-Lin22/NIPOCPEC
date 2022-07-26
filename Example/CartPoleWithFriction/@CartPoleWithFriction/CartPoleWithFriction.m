@@ -39,7 +39,7 @@ classdef CartPoleWithFriction < DifferentialVariationalInequalities
             plant.DynVarLimit.x_Max = [5; 180/180*pi; 2; 1]; 
             plant.DynVarLimit.x_Min = [0; -180/180*pi; -2; -1];            
             
-            % initial other properties
+            % initialize other properties
             if nargin ~= 0
                 if ~isempty(timeStep)
                     plant.timeStep = timeStep;

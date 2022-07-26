@@ -43,7 +43,7 @@ classdef Acrobot < DifferentialVariationalInequalities
             plant.DynVarLimit.x_Max = [2*pi; 1/2*pi; 5; 5]; 
             plant.DynVarLimit.x_Min = [-2*pi; -1/2*pi; -5; -5];            
             
-            % initial other properties
+            % initialize other properties
             if nargin ~= 0
                 if ~isempty(timeStep)
                     plant.timeStep = timeStep;
