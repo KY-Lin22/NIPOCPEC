@@ -69,7 +69,7 @@ for k = 1 : maxIterNum + 1
     
     totalCost = sum(FunEval.L);
     KKT_Residual = solver.computeKKT_Residual(Iterate, FunEval);
-    KKT_Error = solver.computeKKT_Error(Iterate, KKT_Residual);
+    KKT_Error = solver.computeKKT_Error(Iterate, FunEval, KKT_Residual);
     
     TimeElasped_KKT_Residual = toc(KKT_Residual_TimeStart);
     

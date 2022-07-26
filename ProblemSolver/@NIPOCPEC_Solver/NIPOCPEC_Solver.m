@@ -55,7 +55,7 @@ classdef NIPOCPEC_Solver < handle
         
         KKT_Residual = computeKKT_Residual(solver, Iterate, FunEval)
         
-        KKT_Error = computeKKT_Error(solver, Iterate, KKT_Residual)
+        KKT_Error = computeKKT_Error(solver, Iterate, FunEval, KKT_Residual)
         
         KKT_Matrix = computeKKT_Matrix(solver, FunEval)
         
@@ -74,7 +74,7 @@ classdef NIPOCPEC_Solver < handle
         [Iterate_FRP, Info] = FeasibilityRestorationPhase_MinDeviation(solver, Iterate_Ref, FunEval_Ref, s, z)
         
         % compute perturbed parameter s and z
-        [s_k, z_k, FunEval_k] = computePerturedParam(solver,Iterate_k, FunEval_k, s, z)
+        [s_k, z_k, FunEval_k] = computePerturedParam(solver, Iterate_k, FunEval_k, s, z)
  
         % examine solution
         Info = solutionExaminer(solver, solution, Record)

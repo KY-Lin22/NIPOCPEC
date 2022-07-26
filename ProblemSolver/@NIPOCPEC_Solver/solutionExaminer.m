@@ -30,7 +30,7 @@ FunEval.PHIvar = OCPEC.computeConstraintFunJacobian_PHI(solution, sEnd);
 % total cost and KKT error
 totalCost = sum(FunEval.L);
 KKT_Residual = solver.computeKKT_Residual(solution, FunEval);
-KKT_Error = solver.computeKKT_Error(solution, KKT_Residual);
+KKT_Error = solver.computeKKT_Error(solution, FunEval, KKT_Residual);
 
 %% Solution Examiner: Max Complementarity Residual between inequality constraints and its dual variables
 % G and sigma

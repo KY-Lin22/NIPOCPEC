@@ -1,4 +1,4 @@
-function KKT_Error = computeKKT_Error(solver, Iterate, KKT_Residual)
+function KKT_Error = computeKKT_Error(solver, Iterate, FunEval, KKT_Residual)
 %computeKKT_Error
 %   Detailed explanation goes here
 
@@ -12,7 +12,12 @@ LAMBDA_trial = (LAMBDA_norm)/(OCPEC.nStages * OCPEC.Dim.LAMBDA);
 stationarityScaling = max([scaling_max, LAMBDA_trial])/scaling_max;
 
 % compute KKT_Error
-Feasibility = [KKT_Residual.G_Fsb; KKT_Residual.C_Fsb; KKT_Residual.F_Fsb; KKT_Residual.PHI_Fsb];
+if (strcmp(OCPEC.VI_mode,'Reg_NCPs')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
+    Feasibility = [FunEval.PSIg; FunEval.C; FunEval.F; FunEval.PSIphi];
+elseif strcmp(OCPEC.VI_mode,  'SmoothingEquation')
+    Feasibility = [FunEval.PSIg; FunEval.C; FunEval.F; FunEval.PHI];
+end 
+
 Stationarity = [KKT_Residual.HtauT; KKT_Residual.HxTlambdaNext; KKT_Residual.HpT; KKT_Residual.HwT];
 
 KKT_Error.Feasibility = norm(reshape(Feasibility, [], 1), Inf);
