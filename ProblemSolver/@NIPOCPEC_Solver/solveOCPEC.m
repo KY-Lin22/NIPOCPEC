@@ -21,7 +21,7 @@ Record = struct('s', zeros(maxIterNum + 1, 1), 'z', zeros(maxIterNum + 1, 1), 'I
     'iterNum', 0, 'terminalStatus',0, 'terminalCond', []); 
 Record.IterateType = cell(maxIterNum + 1, 1);
 Record.KKT_Error = struct('Total', zeros(maxIterNum + 1, 1), 'Feasibility', zeros(maxIterNum + 1, 1), 'Stationarity', zeros(maxIterNum + 1, 1));   
-Record.Time = struct('FunEval', 0, 'KKT', 0, 'SearchDirection', 0, 'LineSearch', 0, 'FRP', 0, 'else', 0, 'total', 0);
+Record.Time = struct('JacobianHessian', 0, 'KKT', 0, 'SearchDirection', 0, 'LineSearch', 0, 'FRP', 0, 'else', 0, 'total', 0);
 
 %% solving OCPEC
 disp('******************************************************************');
@@ -36,7 +36,7 @@ Merit = 0;
 beta = betaInit;
 stepSize = 0;
 
-TimeElasped_FunEval = 0;
+TimeElasped_JacobianHessian = 0;
 TimeElasped_KKT = 0;
 TimeElasped_SearchDirection = 0;
 TimeElasped_LineSearch = 0;
@@ -50,19 +50,19 @@ FailureFlag.FRP = false;
 for k = 1 : maxIterNum + 1
     totalTimeStart = tic;
     %% step 1: Function and Jacobian Evaluation of Previous Iterate (KKT Residual)     
-    FunEval_Jacobian_TimeStart = tic;
-    
     % function
     if k == 1
         % only the first one needs, others can reuse the results from line search or FRP
         FunEval = solver.FunctionEvaluation(Iterate, s, z, 'Regular');
     end    
     % Jacobian
+    Jacobian_TimeStart = tic;
+    
     FunEval.Lvar = OCPEC.computeCost_Jacobian(Iterate, 'Regular');
     [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
     FunEval.PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);   
     
-    TimeElasped_FunEval_Jacobian = toc(FunEval_Jacobian_TimeStart);
+    TimeElasped_Jacobian = toc(Jacobian_TimeStart);
     
     % totalCost, KKT residual and error
     KKT_Residual_TimeStart = tic;
@@ -87,9 +87,9 @@ for k = 1 : maxIterNum + 1
     Record.KKT_Error.Feasibility(k)  = KKT_Error.Feasibility;
     Record.KKT_Error.Stationarity(k) = KKT_Error.Stationarity;  
     
-    TimeElasped_Else = TimeElasped_Total - TimeElasped_FunEval - TimeElasped_KKT...
+    TimeElasped_Else = TimeElasped_Total - TimeElasped_JacobianHessian - TimeElasped_KKT...
         - TimeElasped_SearchDirection - TimeElasped_LineSearch - TimeElasped_FRP;    
-    Record.Time.FunEval         = Record.Time.FunEval         + TimeElasped_FunEval;
+    Record.Time.JacobianHessian = Record.Time.JacobianHessian + TimeElasped_JacobianHessian;
     Record.Time.KKT             = Record.Time.KKT             + TimeElasped_KKT;
     Record.Time.SearchDirection = Record.Time.SearchDirection + TimeElasped_SearchDirection;
     Record.Time.LineSearch      = Record.Time.LineSearch      + TimeElasped_LineSearch;
@@ -149,12 +149,12 @@ for k = 1 : maxIterNum + 1
        
     %% step 4: Function and Jacobian Evaluation of Previous Iterate (KKT Matrix)
     % Hessian and KKT matrix 
-    FunEval_Hessian_TimeStart = tic;
+    Hessian_TimeStart = tic;
     
     FunEval.Hessian = solver.computeHessian(Iterate, s, 'Regular');
     
-    TimeElasped_FunEval_Hessian = toc(FunEval_Hessian_TimeStart);
-    TimeElasped_FunEval = TimeElasped_FunEval_Jacobian + TimeElasped_FunEval_Hessian;
+    TimeElasped_Hessian = toc(Hessian_TimeStart);
+    TimeElasped_JacobianHessian = TimeElasped_Jacobian + TimeElasped_Hessian;
     
     % KKT matrix
     KKT_Matrix_TimeStart = tic;
