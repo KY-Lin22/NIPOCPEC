@@ -58,9 +58,9 @@ for k = 1 : maxIterNum + 1
         FunEval = solver.FunctionEvaluation(Iterate, s, z, 'Regular');
     end    
     % Jacobian
-    FunEval.Lvar = OCPEC.computeCostFunJacobian(Iterate, 'Regular');
-    [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraintFunJacobian_G_C_F(Iterate);
-    FunEval.PHIvar = OCPEC.computeConstraintFunJacobian_PHI(Iterate, s);   
+    FunEval.Lvar = OCPEC.computeCost_Jacobian(Iterate, 'Regular');
+    [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
+    FunEval.PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);   
     
     TimeElasped_FunEval_Jacobian = toc(FunEval_Jacobian_TimeStart);
     

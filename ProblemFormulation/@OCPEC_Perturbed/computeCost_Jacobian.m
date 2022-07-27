@@ -1,5 +1,5 @@
-function Lvar = computeCostFunJacobian(OCPEC, Iterate, mode)
-%computeCostFunJacobian
+function Lvar = computeCost_Jacobian(OCPEC, Iterate, mode)
+%computeCost_Jacobian
 %   Detailed explanation goes here
 
 %%

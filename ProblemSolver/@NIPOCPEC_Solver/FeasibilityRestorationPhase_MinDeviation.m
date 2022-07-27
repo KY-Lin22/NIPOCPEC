@@ -59,7 +59,7 @@ for j = 1 : maxIterNum + 1
             'G', FunEval_Ref.G, 'C', FunEval_Ref.C, 'F', FunEval_Ref.F, 'PHI',FunEval_Ref.PHI,...
             'PSIg', FunEval_Ref.PSIg, 'PSIgSigma', FunEval_Ref.PSIgSigma, 'PSIgG', FunEval_Ref.PSIgG,...
             'PSIphi', FunEval_Ref.PSIphi, 'PSIphiGamma', FunEval_Ref.PSIphiGamma, 'PSIphiPHI', FunEval_Ref.PSIphiPHI);
-        FunEval.L = OCPEC.computeCostFun(Iterate, 'FRP');
+        FunEval.L = OCPEC.computeCost_Function(Iterate, 'FRP');
     end    
     % totalCost and Feasibility
     totalCost = sum(FunEval.L);
@@ -129,7 +129,7 @@ for j = 1 : maxIterNum + 1
                     'G', FunEval.G, 'C', FunEval.C, 'F', FunEval.F, 'PHI',FunEval.PHI,...
                     'PSIg', FunEval.PSIg, 'PSIgSigma', FunEval.PSIgSigma, 'PSIgG', FunEval.PSIgG,...
                     'PSIphi', FunEval.PSIphi, 'PSIphiGamma', FunEval.PSIphiGamma, 'PSIphiPHI', FunEval.PSIphiPHI);
-                FunEval_FRP.L = OCPEC.computeCostFun(Iterate_FRP, 'Regular');                  
+                FunEval_FRP.L = OCPEC.computeCost_Function(Iterate_FRP, 'Regular');                  
                 
                 % termination message
                 terminationMsg_1 = ['FRP returns a less infeasibility iterate after ', num2str(j - 1), ' iteration; '];
@@ -166,9 +166,9 @@ for j = 1 : maxIterNum + 1
     
     %% step 4: Function and Jacobian Evaluation of Previous Iterate (KKT Residual and Matrix)
     % Jacobian and KKT residual
-    FunEval.Lvar = OCPEC.computeCostFunJacobian(Iterate, 'FRP');
-    [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraintFunJacobian_G_C_F(Iterate);
-    FunEval.PHIvar = OCPEC.computeConstraintFunJacobian_PHI(Iterate, s);     
+    FunEval.Lvar = OCPEC.computeCost_Jacobian(Iterate, 'FRP');
+    [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
+    FunEval.PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);     
     
     KKT_Residual = solver.computeKKT_Residual(Iterate, FunEval);
     
@@ -220,9 +220,9 @@ nStages = OCPEC.nStages;
 LAMBDA_threshold = 1000;
 
 % Jacobian evaluation
-Lvar = OCPEC.computeCostFunJacobian(Iterate, 'Regular');
-[Gvar, Cvar, Fvar] = OCPEC.computeConstraintFunJacobian_G_C_F(Iterate);
-PHIvar = OCPEC.computeConstraintFunJacobian_PHI(Iterate, s);
+Lvar = OCPEC.computeCost_Jacobian(Iterate, 'Regular');
+[Gvar, Cvar, Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
+PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);
     
 %% compute dual variables by solving an overdetermined linear equation system in a backward recursion manner
 eta = zeros(Dim.eta, nStages);

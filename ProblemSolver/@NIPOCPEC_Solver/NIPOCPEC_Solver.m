@@ -46,7 +46,7 @@ classdef NIPOCPEC_Solver < handle
         showResult(solver, Info)
         
         %% Methods in solveOCPEC method
-        % Function and Jacobian Evaluation
+        % function and jacobian evaluation
         codeGen(solver)
         
         FunEval = FunctionEvaluation(solver, Iterate, s, z, mode)
@@ -60,7 +60,7 @@ classdef NIPOCPEC_Solver < handle
         KKT_Matrix = computeKKT_Matrix(solver, FunEval)
         
         % FB
-        [PSI, PSIa, PSIb] = computeFB_Func_Jacobian(solver, a, b, z)
+        [PSI, PSIa, PSIb] = computeFB_Function_Jacobian(solver, a, b, z)
         
         value = computeFB_minusInvPSIbPSI(solver, PSIb, PSI)
         

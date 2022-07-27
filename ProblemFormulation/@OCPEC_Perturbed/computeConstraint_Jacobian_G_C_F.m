@@ -1,5 +1,5 @@
-function [Gvar, Cvar, Fvar] = computeConstraintFunJacobian_G_C_F(OCPEC, Iterate)
-%computeConstraintFunJacobian_G_C_F
+function [Gvar, Cvar, Fvar] = computeConstraint_Jacobian_G_C_F(OCPEC, Iterate)
+%computeConstraint_Jacobian_G_C_F
 %   Detailed explanation goes here
 %%
 nStages = OCPEC.nStages;

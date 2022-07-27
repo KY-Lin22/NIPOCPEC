@@ -22,9 +22,9 @@ for n = 1 : nStages
 end
 
 % Jacobian evaluation
-FunEval.Lvar = OCPEC.computeCostFunJacobian(solution, 'Regular');
-[FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraintFunJacobian_G_C_F(solution);
-FunEval.PHIvar = OCPEC.computeConstraintFunJacobian_PHI(solution, sEnd);
+FunEval.Lvar = OCPEC.computeCost_Jacobian(solution, 'Regular');
+[FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(solution);
+FunEval.PHIvar = OCPEC.computeConstraint_Jacobian_PHI(solution, sEnd);
 
 %% Solution Examiner: Cost, KKT Error
 % total cost and KKT error

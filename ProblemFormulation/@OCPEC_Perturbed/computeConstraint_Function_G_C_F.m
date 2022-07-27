@@ -1,5 +1,5 @@
-function [G, C, F] = computeConstraintFun_G_C_F(OCPEC, Iterate)
-%computeConstraintFun_G_C_F
+function [G, C, F] = computeConstraint_Function_G_C_F(OCPEC, Iterate)
+%computeConstraint_Function_G_C_F
 %   Detailed explanation goes here
 
 nStages = OCPEC.nStages;

@@ -1,5 +1,5 @@
-function PHIvar = computeConstraintFunJacobian_PHI(OCPEC, Iterate, s)
-%computeConstraintFunJacobian_PHI
+function PHIvar = computeConstraint_Jacobian_PHI(OCPEC, Iterate, s)
+%computeConstraint_Jacobian_PHI
 %   Detailed explanation goes here
 %%
 nStages = OCPEC.nStages;

@@ -1,5 +1,5 @@
-function PHI = computeConstraintFun_PHI(OCPEC, Iterate, s)
-%computeConstraintFun_PHI
+function PHI = computeConstraint_Function_PHI(OCPEC, Iterate, s)
+%computeConstraint_Function_PHI
 %   Detailed explanation goes here
 nStages = OCPEC.nStages;
 Dim = OCPEC.Dim;

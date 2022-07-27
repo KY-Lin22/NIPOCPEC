@@ -41,31 +41,31 @@ if (s_k == s) && (z_k == z)
      
 elseif (s_k ~= s) && (z_k == z)
     % only s is update
-    FunEval_k.PHI = OCPEC.computeConstraintFun_PHI(Iterate_k, s_k);
+    FunEval_k.PHI = OCPEC.computeConstraint_Function_PHI(Iterate_k, s_k);
     if (strcmp(OCPEC.VI_mode,'Reg_NCPs')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
         [FunEval_k.PSIphi, FunEval_k.PSIphiGamma, FunEval_k.PSIphiPHI] =...
-            solver.computeFB_Func_Jacobian(Iterate_k.gamma, FunEval_k.PHI, z_k);        
+            solver.computeFB_Function_Jacobian(Iterate_k.gamma, FunEval_k.PHI, z_k);        
     end
     
 elseif (s_k == s) && (z_k ~= z)
     % only z is update
     [FunEval_k.PSIg, FunEval_k.PSIgSigma, FunEval_k.PSIgG] =...
-        solver.computeFB_Func_Jacobian(Iterate_k.sigma, FunEval_k.G, z_k);
+        solver.computeFB_Function_Jacobian(Iterate_k.sigma, FunEval_k.G, z_k);
     
     if (strcmp(OCPEC.VI_mode,'Reg_NCPs')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
         [FunEval_k.PSIphi, FunEval_k.PSIphiGamma, FunEval_k.PSIphiPHI] =...
-            solver.computeFB_Func_Jacobian(Iterate_k.gamma, FunEval_k.PHI, z_k);
+            solver.computeFB_Function_Jacobian(Iterate_k.gamma, FunEval_k.PHI, z_k);
     end
     
 else
     % both s and z update
     [FunEval_k.PSIg, FunEval_k.PSIgSigma, FunEval_k.PSIgG] =...
-        solver.computeFB_Func_Jacobian(Iterate_k.sigma, FunEval_k.G, z_k);
+        solver.computeFB_Function_Jacobian(Iterate_k.sigma, FunEval_k.G, z_k);
     
-    FunEval_k.PHI = OCPEC.computeConstraintFun_PHI(Iterate_k, s_k);
+    FunEval_k.PHI = OCPEC.computeConstraint_Function_PHI(Iterate_k, s_k);
     if (strcmp(OCPEC.VI_mode,'Reg_NCPs')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
         [FunEval_k.PSIphi, FunEval_k.PSIphiGamma, FunEval_k.PSIphiPHI] =...
-            solver.computeFB_Func_Jacobian(Iterate_k.gamma, FunEval_k.PHI, z_k);
+            solver.computeFB_Function_Jacobian(Iterate_k.gamma, FunEval_k.PHI, z_k);
     end
         
 end

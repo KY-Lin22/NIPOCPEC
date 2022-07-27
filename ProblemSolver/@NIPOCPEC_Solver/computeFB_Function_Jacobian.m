@@ -1,5 +1,5 @@
-function [PSI, PSIa, PSIb] = computeFB_Func_Jacobian(solver, a, b, z)
-%computeFB_Func_Jacobian
+function [PSI, PSIa, PSIb] = computeFB_Function_Jacobian(solver, a, b, z)
+%computeFB_Function_Jacobian
 %   compute Fischer Burmeister Function and Jacobian
 
 % check input

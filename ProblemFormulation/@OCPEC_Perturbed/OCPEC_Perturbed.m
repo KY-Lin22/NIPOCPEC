@@ -293,24 +293,24 @@ classdef OCPEC_Perturbed < handle
         
         setEqualityConstraints(OCPEC, C)  
         
-        % Code Generation Method 
+        % code generation
         codeGen(OCPEC)
         
         % show OCPEC informulation
         showInfo(OCPEC)      
         
-        % Function and Jacobian evaluation method about cost and constraint
-        L = computeCostFun(OCPEC, Iterate, mode)
+        % function and jacobian evaluation about cost and constraint
+        L = computeCost_Function(OCPEC, Iterate, mode)
         
-        Lvar = computeCostFunJacobian(OCPEC, Iterate, mode)
+        Lvar = computeCost_Jacobian(OCPEC, Iterate, mode)
         
-        [G, C, F] = computeConstraintFun_G_C_F(OCPEC, Iterate)
+        [G, C, F] = computeConstraint_Function_G_C_F(OCPEC, Iterate)
         
-        PHI = computeConstraintFun_PHI(OCPEC, Iterate, s)
+        PHI = computeConstraint_Function_PHI(OCPEC, Iterate, s)
         
-        [Gvar, Cvar, Fvar] = computeConstraintFunJacobian_G_C_F(OCPEC, Iterate)   
+        [Gvar, Cvar, Fvar] = computeConstraint_Jacobian_G_C_F(OCPEC, Iterate)   
         
-        PHIvar = computeConstraintFunJacobian_PHI(OCPEC, Iterate, s)   
+        PHIvar = computeConstraint_Jacobian_PHI(OCPEC, Iterate, s)   
             
     end
     

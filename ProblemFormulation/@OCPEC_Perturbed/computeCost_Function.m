@@ -1,5 +1,5 @@
-function L = computeCostFun(OCPEC, Iterate, mode)
-%computeCostFun
+function L = computeCost_Function(OCPEC, Iterate, mode)
+%computeCost_Function
 %   Detailed explanation goes here
 
 %%
