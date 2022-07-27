@@ -58,7 +58,9 @@ for j = 1 : maxIterNum + 1
         FunEval = struct('L', [],...
             'G', FunEval_Ref.G, 'C', FunEval_Ref.C, 'F', FunEval_Ref.F, 'PHI',FunEval_Ref.PHI,...
             'PSIg', FunEval_Ref.PSIg, 'PSIgSigma', FunEval_Ref.PSIgSigma, 'PSIgG', FunEval_Ref.PSIgG,...
-            'PSIphi', FunEval_Ref.PSIphi, 'PSIphiGamma', FunEval_Ref.PSIphiGamma, 'PSIphiPHI', FunEval_Ref.PSIphiPHI);
+            'PSIphi', FunEval_Ref.PSIphi, 'PSIphiGamma', FunEval_Ref.PSIphiGamma, 'PSIphiPHI', FunEval_Ref.PSIphiPHI,...
+            'Lvar', [], 'Gvar', [], 'Cvar', [], 'Fvar', [], 'PHIvar',[],...
+            'Hessian', []);
         FunEval.L = OCPEC.computeCost_Function(Iterate, 'FRP');
     end    
     % totalCost and Feasibility
@@ -70,10 +72,12 @@ for j = 1 : maxIterNum + 1
     end  
     
     %% Record and Print Information of Previous Iterate   
+    % record
     if j == 1
         totalCostInit = totalCost;
         FeasibilityInit = Feasibility;
     end      
+    % print
     switch Option.printLevel
         case 0
             prevIterMsg = [];
@@ -119,7 +123,7 @@ for j = 1 : maxIterNum + 1
                 elseif (strcmp(VI_mode, 'SmoothingEquation'))
                     Iterate_FRP.gamma  = zeros(Dim.gamma, nStages);
                 end
-                % compute the dual variables of equality-type constraint using lsqminnorm            
+                % compute the dual variables of equality-type constraint using lsqminnorm (Optional)          
                 if employLSMN
                     [Iterate_FRP.eta, Iterate_FRP.lambda, Iterate_FRP.gamma] = computeDualVar_lsqminnorm(solver, Iterate_FRP, s);
                 end               
@@ -128,7 +132,9 @@ for j = 1 : maxIterNum + 1
                 FunEval_FRP = struct('L', [],...
                     'G', FunEval.G, 'C', FunEval.C, 'F', FunEval.F, 'PHI',FunEval.PHI,...
                     'PSIg', FunEval.PSIg, 'PSIgSigma', FunEval.PSIgSigma, 'PSIgG', FunEval.PSIgG,...
-                    'PSIphi', FunEval.PSIphi, 'PSIphiGamma', FunEval.PSIphiGamma, 'PSIphiPHI', FunEval.PSIphiPHI);
+                    'PSIphi', FunEval.PSIphi, 'PSIphiGamma', FunEval.PSIphiGamma, 'PSIphiPHI', FunEval.PSIphiPHI,...
+                    'Lvar', [], 'Gvar', [], 'Cvar', [], 'Fvar', [], 'PHIvar',[],...
+                    'Hessian', []);
                 FunEval_FRP.L = OCPEC.computeCost_Function(Iterate_FRP, 'Regular');                  
                 
                 % termination message
@@ -165,10 +171,18 @@ for j = 1 : maxIterNum + 1
     end
     
     %% step 4: Function and Jacobian Evaluation of Previous Iterate (KKT Residual and Matrix)
-    % Jacobian and KKT residual
+    % Jacobian and KKT residual    
+    if j == 1
+        % reusing FunEval_Ref except the cost function
+        FunEval.Gvar = FunEval_Ref.Gvar;
+        FunEval.Cvar = FunEval_Ref.Cvar;
+        FunEval.Fvar = FunEval_Ref.Fvar;
+        FunEval.PHIvar = FunEval_Ref.PHIvar;
+    else
+        [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
+        FunEval.PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);
+    end
     FunEval.Lvar = OCPEC.computeCost_Jacobian(Iterate, 'FRP');
-    [FunEval.Gvar, FunEval.Cvar, FunEval.Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
-    FunEval.PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);     
     
     KKT_Residual = solver.computeKKT_Residual(Iterate, FunEval);
     
@@ -223,7 +237,7 @@ LAMBDA_threshold = 1000;
 Lvar = OCPEC.computeCost_Jacobian(Iterate, 'Regular');
 [Gvar, Cvar, Fvar] = OCPEC.computeConstraint_Jacobian_G_C_F(Iterate);
 PHIvar = OCPEC.computeConstraint_Jacobian_PHI(Iterate, s);
-    
+
 %% compute dual variables by solving an overdetermined linear equation system in a backward recursion manner
 eta = zeros(Dim.eta, nStages);
 lambda = zeros(Dim.lambda, nStages);
