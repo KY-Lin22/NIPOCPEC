@@ -18,11 +18,12 @@ plant.codeGen();
 %% formulate an OCPEC problem 
 nStages = 100;
 InitState = [1; 0/180*pi; 0; 0];
-StageCost.xRef = repmat([1; 180/180*pi; 0; 0], 1, nStages);
+EndState = [1; 180/180*pi; 0; 0];
+StageCost.xRef = repmat(EndState, 1, nStages);
 StageCost.tauRef = zeros(1, nStages);
 StageCost.xWeight = [1; 100; 1; 1];
 StageCost.tauWeight = 1; 
-TerminalCost.xRef = [1; 180/180*pi; 0; 0];
+TerminalCost.xRef = EndState;
 TerminalCost.tauRef = 0;
 TerminalCost.xWeight = [1; 100; 10; 20];
 TerminalCost.tauWeight = 1;

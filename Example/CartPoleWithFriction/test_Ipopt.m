@@ -1,18 +1,18 @@
 %% Solving OCPEC with Ipopt solver via CasADi
 clc
 clear all
-delete AffineDVI.gif
-
+delete CartPoleWithFriction.gif
+[~, ~, ~] = rmdir('autoGen_CodeFiles', 's');
 addpath('E:\GitHub\CasADi\casadi-windows-matlabR2016a-v3.5.5')
 import casadi.*
 
-timeStep = 0.01; % Time horizon
+timeStep = 0.04; % Time horizon
 nStages = 100; % number of control intervals
 
 %% Dynamics
 % dynamics variables
 tau_Dim = 1;% control dim
-x_Dim = 2; % state dim
+x_Dim = 4; % state dim
 p_Dim = 1; % equilibrium var dim
 w_Dim = p_Dim; % auxiliary var dim
 u_Dim = tau_Dim + p_Dim + w_Dim; % u = [tau; p; w]
@@ -24,22 +24,30 @@ p = u(tau_Dim + 1 : tau_Dim + p_Dim);
 w = u(tau_Dim + p_Dim + 1 : end);
 
 % state equations
-A = [1, -3; ...
-    -8, 10];
-B = [-3;...
-    -1];
-F = [4;...
-    8];
-f = A * x + B * p + F * tau; % xDot = f(tau, x, p)
+mass = [1; 0.1];
+linkLength = 1;
+g = 9.8;
+
+M = [mass(1) + mass(2),                 mass(2) * linkLength * cos(x(2));...
+     mass(2) * linkLength * cos(x(2)),  mass(2) * linkLength^2];
+C = [0,   -mass(2) * linkLength * x(4) * sin(x(2));...
+     0,   0]; 
+G = [0;...
+     -mass(2) * g * linkLength * sin(x(2))];
+Bu = [tau(1);...
+      0]; 
+P = [p(1);...
+     0]; % friction bewteen cart and ground  
+H = G + Bu + P - C * [x(3); x(4)];   
+f = [x(3);...
+    x(4);...
+    inv(M)*H];
 f_func = Function('f',{x,u}, {f}, {'x', 'u'}, {'f'});
 
-% equilibrium dynamics
-EqlbmDyn_l = -1;
-EqlbmDyn_u = 1;
-C = [1, -3];
-D = 5;
-E = 3;
-K = C * x + D * p + E * tau;
+% equilibrium dynamics 
+EqlbmDyn_l = -2;
+EqlbmDyn_u = 2;
+K = x(3);
 K_func = Function('K',{x,u}, {K}, {'x', 'u'}, {'K'});
 
 % reformulate equilibrium dynamics as a set of inequality and equality constriants using Scholtes reformulation
@@ -55,16 +63,16 @@ ubg_BVI = [Inf; Inf; 0; Inf; Inf];
 
 %% OCPEC
 % specify initial and end state, cost ref and weight matrix
-InitState = [-1/2; -1];
-EndState = [0; 0];
+InitState = [1; 0/180*pi; 0; 0];
+EndState = [1; 180/180*pi; 0; 0];
 
 StageCost.xRef = repmat(EndState, 1, nStages);
 StageCost.tauRef = zeros(1, nStages);
-StageCost.xWeight = [20; 20];
+StageCost.xWeight = [1; 100; 1; 1];
 StageCost.tauWeight = 1;
 TerminalCost.xRef = EndState;
 TerminalCost.tauRef = 0;
-TerminalCost.xWeight = [20; 20];
+TerminalCost.xWeight = [1; 100; 10; 20];
 TerminalCost.tauWeight = 1;
 
 pWeight = 0.001 * eye(p_Dim);
@@ -74,10 +82,10 @@ wWeight = 0.001 * eye(w_Dim);
 X = SX.sym('X', x_Dim, nStages);
 U = SX.sym('U', u_Dim, nStages); 
 
-tau_Max = 2;
-tau_Min = -2;
-x_Max = [2; 2];
-x_Min = [-2; -2];
+tau_Max = 30;
+tau_Min = -30;
+x_Max = [5; 240/180*pi; 20; 20];
+x_Min = [0; -240/180*pi; -20; -20];
 
 lbx = -Inf * ones(x_Dim + u_Dim, nStages);
 ubx = Inf * ones(x_Dim + u_Dim, nStages);
@@ -191,8 +199,8 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
     tau_Opt = u_Opt(1 : tau_Dim, :);
     p_Opt = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
     cstr = reshape(full(solution.g), g_Dim, nStages);
-    EQ = cstr(5, :); % w - K = 0
-    DynF = cstr(1 : x_Dim, :); % 1 : 2       
+    EQ = cstr(7, :); % w - K = 0
+    DynF = cstr(1 : x_Dim, :); % 1 : 4       
     G = [[x_Opt; tau_Opt] - repmat([x_Min; tau_Min], 1, nStages);...
         repmat([x_Max; tau_Max], 1, nStages) - [x_Opt; tau_Opt]];    
     K_Value = zeros(p_Dim, nStages);
@@ -202,7 +210,7 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
     end
     lpu = cstr(x_Dim + 1: x_Dim + 2 * p_Dim, :);
     G_residual = min([zeros(2 * (x_Dim + tau_Dim) * nStages, 1), reshape(G, [], 1)], [], 2);
-    pK_residual = min([zeros(2 * p_Dim * nStages, 1), reshape(lpu, [], 1)], [], 2); % 3 : 4   
+    pK_residual = min([zeros(2 * p_Dim * nStages, 1), reshape(lpu, [], 1)], [], 2); % 5 : 6   
     
     Complementarity_pK = zeros(p_Dim, nStages);
     for n = 1 : nStages
@@ -254,8 +262,9 @@ optSolution.tau = u_Opt(1 : tau_Dim, :);
 optSolution.x = x_Opt;
 optSolution.p = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
 
-plant = AffineDVI(timeStep);
-plant.codeGen();
+plant = CartPoleWithFriction(timeStep, [], [], []);
 plant.setDynVarLimit(tau_Max, tau_Min, x_Max, x_Min) ;
+plant.codeGen();
+
 plant.plotSimuResult(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)
 plant.animateTrajectory(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)

@@ -105,7 +105,7 @@ PoleEnd = plot(trajPoleEnd_X{1, 1}, trajPoleEnd_Y{1, 1}, '.--r', 'MarkerSize', 1
 xlabel('x_c [m]')
 ylabel('y_c [m]')
 axis equal
-axisLimit_X = [-1; 3];
+axisLimit_X = [-1; 7];
 axisLimit_Y = [-1.2; 1.2];
 % axisLimit_Y = [- 0.5 * cartHeight(1) - linkLength(1);...
 %                0.5 * cartHeight(1) + linkLength(1)]; 
