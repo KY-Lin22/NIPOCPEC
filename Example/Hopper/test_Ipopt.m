@@ -1,19 +1,19 @@
 %% Solving OCPEC with Ipopt solver via CasADi
 clc
 clear all
-delete CartPoleWithFriction.gif
+delete Hopper.gif
 [~, ~, ~] = rmdir('autoGen_CodeFiles', 's');
 addpath('E:\GitHub\CasADi\casadi-windows-matlabR2016a-v3.5.5')
 import casadi.*
 
-timeStep = 0.04; 
+timeStep = 0.01;
 nStages = 100; 
 
 %% Dynamics
 % dynamics variables
-tau_Dim = 1;% control dim
-x_Dim = 4; % state dim
-p_Dim = 1; % equilibrium var dim
+tau_Dim = 3;% control dim
+x_Dim = 8; % state dim
+p_Dim = 3; % equilibrium var dim
 w_Dim = p_Dim; % auxiliary var dim
 u_Dim = tau_Dim + p_Dim + w_Dim; % u = [tau; p; w]
 
@@ -24,55 +24,85 @@ p = u(tau_Dim + 1 : tau_Dim + p_Dim);
 w = u(tau_Dim + p_Dim + 1 : end);
 
 % state equations
-mass = [1; 0.1];
-linkLength = 1;
+mb = 1;
+ml = 0.1;
+Ib = 0.25;
+Il = 0.025;
+mu = 1;
 g = 9.8;
 
-M = [mass(1) + mass(2),                 mass(2) * linkLength * cos(x(2));...
-     mass(2) * linkLength * cos(x(2)),  mass(2) * linkLength^2];
-C = [0,   -mass(2) * linkLength * x(4) * sin(x(2));...
-     0,   0]; 
-G = [0;...
-     -mass(2) * g * linkLength * sin(x(2))];
-Bu = [tau(1);...
-      0]; 
-P = [p(1);...
-     0]; % friction bewteen cart and ground  
-H = G + Bu + P - C * [x(3); x(4)];   
-f = [x(3:4);...
+M = diag([mb + ml, mb + ml, Ib + Il, ml]);
+C = [0;...
+    (mb + ml)*g;...
+    0;...
+    0];% here C := C*dq - G
+B = [0, -sin(x(3));...
+    0, cos(x(3));...
+    1, 0;...
+    0, 1];
+W_N = [0, 1, x(4)*sin(x(3)), -cos(x(3))];
+W_T = [1, 0, x(4)*cos(x(3)), sin(x(3))];
+H = -C + B * [tau(1); tau(2)] + W_N' * p(1) + W_T' * tau(3);
+f = [x(5:8);...
     inv(M)*H];
 f_func = Function('f',{x,u}, {f}, {'x', 'u'}, {'f'});
 
-% equilibrium dynamics 
-EqlbmDyn_l = -2;
-EqlbmDyn_u = 2;
-K = x(3);
-K_func = Function('K',{x,u}, {K}, {'x', 'u'}, {'K'});
+% equilibrium dynamics
+EqlbmDyn_l = [0; 0; 0];
+EqlbmDyn_u = [Inf;Inf;Inf];
+Gap = x(2) - x(4) * cos(x(3));
+pT_lb = tau(3) - (-mu * p(1));
+pT_ub = (mu * p(1)) - tau(3);
+K = [Gap;...
+     pT_lb;...
+     pT_ub];
+K_func = Function('K',{x,u}, {K}, {'x', 'u'}, {'K'}); 
 
 % reformulate equilibrium dynamics as a set of inequality and equality constriants using Scholtes reformulation
 s = 1e-3; % slack 
-BVI = [p - EqlbmDyn_l;...
-    EqlbmDyn_u - p;...%  p in [l, u]   
-    w - K;...% auxiliary variable
-    s - (p - EqlbmDyn_l) * w;...
-    s + (EqlbmDyn_u - p) * w];% regularization
+BVI = SX.sym('BVI', 4 * p_Dim, 1);
+lbg_BVI = zeros(4 * p_Dim, 1);
+ubg_BVI = zeros(4 * p_Dim, 1);
+for i = 1 : p_Dim
+    BVI(4 * (i - 1) + 1 : 4 * i) = [p(i);...
+                                    w(i);...
+                                    w(i) - K(i);...
+                                    s - p(i) * w(i)];
+    lbg_BVI(4 * (i - 1) + 1 : 4 * i) = [0; 0; 0; 0];
+    ubg_BVI(4 * (i - 1) + 1 : 4 * i) = [Inf; Inf; 0; Inf];
+end
 BVI_func = Function('BVI', {x,u}, {BVI}, {'x', 'u'}, {'BVI'});
-lbg_BVI = [0; 0; 0; 0; 0];
-ubg_BVI = [Inf; Inf; 0; Inf; Inf];
+
+% equality constraint and inequality constraint
+vel_T = W_T * x(5:8);
+EqCstr = p(2) - p(3) - vel_T; % using two auxilary variable for vel_T to reformulate friction 
+lbg_EqCstr = 0;
+ubg_EqCstr = 0;
+EqCstr_func = Function('EqCstr', {x,u}, {EqCstr}, {'x', 'u'}, {'EqCstr'});
+
+IneqCstr = 0.01 - p(1) * vel_T; % penalty slip motion
+lbg_IneqCstr = 0;
+ubg_IneqCstr = Inf;
+IneqCstr_func = Function('IneqCstr', {x,u}, {IneqCstr}, {'x', 'u'}, {'IneqCstr'});
 
 %% OCPEC
 % specify initial and end state, cost ref and weight matrix
-InitState = [1; 0/180*pi; 0; 0];
-EndState = [1; 180/180*pi; 0; 0];
+InitState = [0.1; 0.5; 0; 0.5; 0; 0; 0; 0];
+MidState = [0.4; 0.8; 0; 0.1; 0; 0; 0; 0];
+RefState = [0.7; 0.5; 0; 0.5; 0; 0; 0; 0];
 
-StageCost.xRef = repmat(EndState, 1, nStages);
-StageCost.tauRef = zeros(1, nStages);
-StageCost.xWeight = [1; 100; 1; 1];
-StageCost.tauWeight = 1;
-TerminalCost.xRef = EndState;
-TerminalCost.tauRef = 0;
-TerminalCost.xWeight = [1; 100; 10; 20];
-TerminalCost.tauWeight = 1;
+xRef_init_mid = TrajectoryInterpolation(InitState, MidState, 50);
+xRef_mid_end = TrajectoryInterpolation(MidState, RefState, 50);
+
+StageCost.xRef = [xRef_init_mid, xRef_mid_end];
+StageCost.tauRef = repmat([0; 0; 0], 1, nStages);
+StageCost.xWeight = [50; 50; 20; 50; 0.1; 0.1; 0.1; 0.1];
+StageCost.tauWeight = [0.1; 0.1; 0.001]; 
+
+TerminalCost.xRef = RefState;
+TerminalCost.tauRef = [0; 0; 0];
+TerminalCost.xWeight = [50; 50; 50; 50; 0.1; 0.1; 0.1; 0.1];
+TerminalCost.tauWeight = [0.1; 0.1; 0.001];
 
 pWeight = 0.001 * eye(p_Dim);
 wWeight = 0.001 * eye(w_Dim);
@@ -81,10 +111,10 @@ wWeight = 0.001 * eye(w_Dim);
 X = SX.sym('X', x_Dim, nStages);
 U = SX.sym('U', u_Dim, nStages); 
 
-tau_Max = 30;
-tau_Min = -30;
-x_Max = [5; 240/180*pi; 20; 20];
-x_Min = [0; -240/180*pi; -20; -20];
+tau_Max = [50; 50; 100];
+tau_Min = [-50; -50; -100];
+x_Max = [0.8; 1.5; pi; 0.5; 10; 10; 5; 5];
+x_Min = [0; 0; -pi; 0.1; -10; -10; -5; -5];
 
 lbx = -Inf * ones(x_Dim + u_Dim, nStages);
 ubx = Inf * ones(x_Dim + u_Dim, nStages);
@@ -93,12 +123,13 @@ ubx(1 : x_Dim + tau_Dim, :) = repmat([x_Max; tau_Max], 1, nStages);
 
 % cost function and constraints
 L = 0; % initial cost function
-g_Dim = size([f; BVI], 1);
+g_Dim = size([f; BVI; EqCstr; IneqCstr], 1);
 g = SX.sym('g', g_Dim, nStages); % constraint function
 lbg = zeros(g_Dim, nStages);
 ubg = zeros(g_Dim, nStages);
-lbg(size(f, 1) + 1 : end, :) = repmat(lbg_BVI, 1, nStages);
-ubg(size(f, 1) + 1 : end, :) = repmat(ubg_BVI, 1, nStages);
+
+lbg(size(f, 1) + 1 : end, :) = repmat([lbg_BVI; lbg_EqCstr; lbg_IneqCstr], 1, nStages);
+ubg(size(f, 1) + 1 : end, :) = repmat([ubg_BVI; ubg_EqCstr; ubg_IneqCstr], 1, nStages);
 
 for n = 1 : nStages
     if n == 1
@@ -126,12 +157,15 @@ for n = 1 : nStages
     
     % discretize dynamics by implicit euler method
     F_n = x_nPrev - x_n + timeStep * f_func(x_n, u_n);
-    % reformulated equilibrium constraint
+    % reformulated equilibrium constraint, equality constraint and inequality constraint
     BVI_n = BVI_func(x_n, u_n);
-    
+    EqCstr_n = EqCstr_func(x_n, u_n);
+    IneqCstr_n = IneqCstr_func(x_n, u_n);
     % constraint function
     g(:, n) = [F_n;...
-        BVI_n]; 
+        BVI_n;...
+        EqCstr_n;...
+        IneqCstr_n]; 
 end
 
 %% Solver
@@ -151,7 +185,7 @@ lbg = reshape(lbg, g_Dim * nStages, 1);
 ubg = reshape(ubg, g_Dim * nStages, 1);
 
 %
-robustTest_Num = 1;
+robustTest_Num = 100;
 RobustTestRecord.InitialGuess = cell(robustTest_Num, 1);
 RobustTestRecord.solution = cell(robustTest_Num, 1);
 successCase = 0;
@@ -171,7 +205,7 @@ tau_Init = randn(tau_Dim, 1);
 tau_End = TerminalCost.tauRef;
 tau_0 = TrajectoryInterpolation(tau_Init, tau_End, nStages); % tau
 
-XU_0 = zeros(x_Dim + u_Dim, nStages);
+XU_0 = ones(x_Dim + u_Dim, nStages);
 XU_0(1 : x_Dim + tau_Dim, :) = [x_0; tau_0];
 XU_0 = reshape(XU_0, (x_Dim + u_Dim) * nStages, 1);
 
@@ -198,18 +232,20 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
     tau_Opt = u_Opt(1 : tau_Dim, :);
     p_Opt = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
     cstr = reshape(full(solution.g), g_Dim, nStages);
-    EQ = cstr(7, :); % w - K = 0
-    DynF = cstr(1 : x_Dim, :); % 1 : 4       
-    G = [[x_Opt; tau_Opt] - repmat([x_Min; tau_Min], 1, nStages);...
-        repmat([x_Max; tau_Max], 1, nStages) - [x_Opt; tau_Opt]];    
+    
+    Eq = cstr([11, 15, 19, 21], :); % w - K = 0, C
+    DynF = cstr(1 : x_Dim, :); % 1 : 8       
+    InEq = [[x_Opt; tau_Opt] - repmat([x_Min; tau_Min], 1, nStages);...
+        repmat([x_Max; tau_Max], 1, nStages) - [x_Opt; tau_Opt];...
+        cstr(22, :)];    
     K_Value = zeros(p_Dim, nStages);
     for n = 1 : nStages
         K_n = K_func(x_Opt(:, n), u_Opt(:, n));
         K_Value(:, n) = full(K_n);
     end
-    lpu = cstr(x_Dim + 1: x_Dim + 2 * p_Dim, :);
-    G_residual = min([zeros(2 * (x_Dim + tau_Dim) * nStages, 1), reshape(G, [], 1)], [], 2);
-    pK_residual = min([zeros(2 * p_Dim * nStages, 1), reshape(lpu, [], 1)], [], 2); % 5 : 6   
+    lpu = cstr([9, 10, 13, 14, 17, 18], :);
+    G_residual = min([zeros((2 * (x_Dim + tau_Dim) + 1) * nStages, 1), reshape(InEq, [], 1)], [], 2);
+    pK_residual = min([zeros(2 * p_Dim * nStages, 1), reshape(lpu, [], 1)], [], 2); % 9, 10, 13, 14, 17, 18   
     
     Complementarity_pK = zeros(p_Dim, nStages);
     for n = 1 : nStages
@@ -224,7 +260,7 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
         end
     end
     
-    RobustTestRecord.eqCstr(successCase, 1) = max([norm(reshape(EQ, [], 1), Inf), norm(reshape(DynF, [], 1), Inf)]);
+    RobustTestRecord.eqCstr(successCase, 1) = max([norm(reshape(Eq, [], 1), Inf), norm(reshape(DynF, [], 1), Inf)]);
     RobustTestRecord.ineqCstr(successCase, 1) = max(norm(G_residual, Inf), norm(reshape(pK_residual, [], 1), Inf));
     RobustTestRecord.compCstr(successCase, 1)  = norm(reshape(Complementarity_pK, [], 1), Inf);   
 end
@@ -261,9 +297,8 @@ optSolution.tau = u_Opt(1 : tau_Dim, :);
 optSolution.x = x_Opt;
 optSolution.p = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
 
-plant = CartPoleWithFriction(timeStep, [], [], []);
+plant = Hopper(timeStep, [], [], []);
 plant.setDynVarLimit(tau_Max, tau_Min, x_Max, x_Min) ;
 plant.codeGen();
-
 plant.plotSimuResult(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)
 plant.animateTrajectory(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)

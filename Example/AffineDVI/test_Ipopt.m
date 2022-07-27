@@ -6,8 +6,8 @@ delete AffineDVI.gif
 addpath('E:\GitHub\CasADi\casadi-windows-matlabR2016a-v3.5.5')
 import casadi.*
 
-timeStep = 0.01; % Time horizon
-nStages = 100; % number of control intervals
+timeStep = 0.01; 
+nStages = 100; 
 
 %% Dynamics
 % dynamics variables

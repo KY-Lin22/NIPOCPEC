@@ -107,7 +107,7 @@ plant.animateTrajectory(timeStep, InitState, solution.tau, solution.x, solution.
 solver.showResult(Info)
 
 %% solving OCPEC (robust test)
-robustTest_Num = 10;
+robustTest_Num = 100;
 solver.Option.printLevel = 0;
 RobustTestRecord.InitialGuess = cell(robustTest_Num, 1);
 RobustTestRecord.solution = cell(robustTest_Num, 1);
