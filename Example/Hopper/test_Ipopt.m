@@ -8,7 +8,8 @@ import casadi.*
 
 timeStep = 0.01;
 nStages = 100; 
-
+s = 1e-7; % slack 
+z = 1e-4;
 %% Dynamics
 % dynamics variables
 tau_Dim = 3;% control dim
@@ -59,7 +60,6 @@ K = [Gap;...
 K_func = Function('K',{x,u}, {K}, {'x', 'u'}, {'K'}); 
 
 % reformulate equilibrium dynamics as a set of inequality and equality constriants using Scholtes reformulation
-s = 1e-3; % slack 
 BVI = SX.sym('BVI', 4 * p_Dim, 1);
 lbg_BVI = zeros(4 * p_Dim, 1);
 ubg_BVI = zeros(4 * p_Dim, 1);
@@ -173,7 +173,6 @@ end
 Option = struct;
 Option.ipopt.max_iter = 500;
 Option.ipopt.tol = 1e-2;
-z = 1e-3;
 Option.ipopt.mu_target = 0.5 * (z)^2;
 
 % reshape optimal variable and constraint
@@ -185,7 +184,7 @@ lbg = reshape(lbg, g_Dim * nStages, 1);
 ubg = reshape(ubg, g_Dim * nStages, 1);
 
 %
-robustTest_Num = 100;
+robustTest_Num = 50;
 RobustTestRecord.InitialGuess = cell(robustTest_Num, 1);
 RobustTestRecord.solution = cell(robustTest_Num, 1);
 successCase = 0;
@@ -224,7 +223,7 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
     successCase = successCase + 1;
     RobustTestRecord.iterNum(successCase, 1) = solver.stats.iter_count;
     RobustTestRecord.totalTime(successCase, 1) = totalTime;
-    RobustTestRecord.cost(i, 1) = full(solution.f);
+    RobustTestRecord.cost(successCase, 1) = full(solution.f);
     % compute constraint violation
     XU_Opt = reshape(full(solution.x), (x_Dim + u_Dim), nStages);
     x_Opt = XU_Opt(1 : x_Dim, :);
@@ -266,7 +265,7 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
 end
 
 end
-
+save('RobustTest_IPOPT_Data.mat', 'RobustTestRecord');
 disp('robustTest')
 disp(['success/total: ', num2str(successCase), '/', num2str(robustTest_Num)])
 disp(['time per iter: ', num2str(1000 * sum(RobustTestRecord.totalTime) /sum(RobustTestRecord.iterNum), '%10.3f'), ' ms/Iter' ])
@@ -290,15 +289,15 @@ disp(['compCstr: ', num2str(sum(RobustTestRecord.compCstr) / successCase, '%10.3
     num2str(min(RobustTestRecord.compCstr(1 : successCase, 1)), '%10.3e'),'(min)'])
 
 %% plot simulation result
-XU_Opt = reshape(full(solution.x), (x_Dim + u_Dim), nStages);
-x_Opt = XU_Opt(1 : x_Dim, :);
-u_Opt = XU_Opt(x_Dim + 1 : end, :);
-optSolution.tau = u_Opt(1 : tau_Dim, :);
-optSolution.x = x_Opt;
-optSolution.p = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
-
-plant = Hopper(timeStep, [], [], []);
-plant.setDynVarLimit(tau_Max, tau_Min, x_Max, x_Min) ;
-plant.codeGen();
-plant.plotSimuResult(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)
-plant.animateTrajectory(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)
+% XU_Opt = reshape(full(solution.x), (x_Dim + u_Dim), nStages);
+% x_Opt = XU_Opt(1 : x_Dim, :);
+% u_Opt = XU_Opt(x_Dim + 1 : end, :);
+% optSolution.tau = u_Opt(1 : tau_Dim, :);
+% optSolution.x = x_Opt;
+% optSolution.p = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
+% 
+% plant = Hopper(timeStep, [], [], []);
+% plant.setDynVarLimit(tau_Max, tau_Min, x_Max, x_Min) ;
+% plant.codeGen();
+% plant.plotSimuResult(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)
+% plant.animateTrajectory(timeStep, InitState, optSolution.tau, optSolution.x, optSolution.p)

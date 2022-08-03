@@ -48,20 +48,20 @@ solver.codeGen();
 %% set option and generate initial guess
 solver.Option.maxIterNum = 100;
 solver.Option.Tolerance.KKT_Error_Total = 1e-2;
-solver.Option.Tolerance.KKT_Error_Feasibility = 1e-2;
-solver.Option.Tolerance.KKT_Error_Stationarity = 1e-2;
+solver.Option.Tolerance.KKT_Error_Feasibility = 1e-4;
+solver.Option.Tolerance.KKT_Error_Stationarity = 1e-4;
 
 solver.Option.RegularParam.nu_J = 1e-7;
 solver.Option.RegularParam.nu_G = 1e-7;
 solver.Option.RegularParam.nu_H = 0;
 
-solver.Option.LineSearch.stepSize_Min = 0.001;
+solver.Option.LineSearch.stepSize_Min = 0.01;
 solver.Option.employFeasibilityRestorationPhase = true;
 
 solver.Option.zInit = 1e-1; 
-solver.Option.zEnd  = 1e-7;
+solver.Option.zEnd  = 1e-4;
 solver.Option.sInit = 1e-1;
-solver.Option.sEnd  = 1e-7;
+solver.Option.sEnd  = 1e-4;
 
 % show solver information
 solver.showInfo();
@@ -122,7 +122,9 @@ for i = 1 : robustTest_Num
         RobustTestRecord.ineqCstr(successCase, 1) = max([Info.solutionMsg.r_ineq_G, Info.solutionMsg.r_eqlb_ineq]);
         RobustTestRecord.compCstr(successCase, 1)  = Info.solutionMsg.r_eqlb_comp;
     end
+    disp(['success / Test No.: ', num2str(successCase), ' / ', num2str(i)])
 end  
+save('RobustTest_NIP_Data.mat', 'RobustTestRecord');
 % show result 
 disp('robustTest')
 disp(['success/total: ', num2str(successCase), '/', num2str(robustTest_Num)])

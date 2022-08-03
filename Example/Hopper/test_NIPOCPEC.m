@@ -24,9 +24,15 @@ InitState = [0.1; 0.5; 0; 0.5; 0; 0; 0; 0];
 MidState = [0.4; 0.8; 0; 0.1; 0; 0; 0; 0];
 RefState = [0.7; 0.5; 0; 0.5; 0; 0; 0; 0];
 
-xRef_init_mid = TrajectoryInterpolation(InitState, MidState, 50);
-xRef_mid_end = TrajectoryInterpolation(MidState, RefState, 50);
-StageCost.xRef = [xRef_init_mid, xRef_mid_end];
+% xRef_init_mid = TrajectoryInterpolation(InitState, MidState, 50);
+% xRef_mid_end = TrajectoryInterpolation(MidState, RefState, 50);
+% StageCost.xRef = [xRef_init_mid, xRef_mid_end];
+
+xRef_init_mid = TrajectoryInterpolation(InitState, MidState, 30);
+xRef_mid_end = TrajectoryInterpolation(MidState, RefState, 40);
+xRef_end_end = TrajectoryInterpolation(RefState, RefState, 30);
+StageCost.xRef = [xRef_init_mid, xRef_mid_end, xRef_end_end];
+
 StageCost.tauRef = repmat([0; 0; 0], 1, nStages);
 StageCost.xWeight = [50; 50; 20; 50; 0.1; 0.1; 0.1; 0.1];
 StageCost.tauWeight = [0.1; 0.1; 0.001]; 
@@ -63,18 +69,18 @@ solver.codeGen();
 %% set option and generate initial guess
 solver.Option.maxIterNum = 500;
 solver.Option.Tolerance.KKT_Error_Total = 1e-2;
-solver.Option.Tolerance.KKT_Error_Feasibility = 1e-2;
-solver.Option.Tolerance.KKT_Error_Stationarity = 1e-2;
+solver.Option.Tolerance.KKT_Error_Feasibility = 1e-4;
+solver.Option.Tolerance.KKT_Error_Stationarity = 1e-4;
 
 solver.Option.RegularParam.nu_J = 1e-7;
 solver.Option.RegularParam.nu_G = 1e-7;
 solver.Option.RegularParam.nu_H = 0;
 
-solver.Option.LineSearch.stepSize_Min = 0.001;
+solver.Option.LineSearch.stepSize_Min = 0.01;
 solver.Option.employFeasibilityRestorationPhase = true;
 
 solver.Option.zInit = 1e-1; 
-solver.Option.zEnd  = 1e-3;
+solver.Option.zEnd  = 1e-4;
 solver.Option.sInit = 1e-1;
 solver.Option.sEnd  = 1e-3;
 
@@ -107,7 +113,7 @@ plant.animateTrajectory(timeStep, InitState, solution.tau, solution.x, solution.
 solver.showResult(Info)
 
 %% solving OCPEC (robust test)
-robustTest_Num = 100;
+robustTest_Num = 50;
 solver.Option.printLevel = 0;
 RobustTestRecord.InitialGuess = cell(robustTest_Num, 1);
 RobustTestRecord.solution = cell(robustTest_Num, 1);
@@ -140,6 +146,7 @@ for i = 1 : robustTest_Num
     end
     disp(['success / Test No.: ', num2str(successCase), ' / ', num2str(i)])
 end  
+save('RobustTest_IPOPT_Data.mat', 'RobustTestRecord');
 % show result 
 disp('robustTest')
 disp(['success/total: ', num2str(successCase), '/', num2str(robustTest_Num)])
