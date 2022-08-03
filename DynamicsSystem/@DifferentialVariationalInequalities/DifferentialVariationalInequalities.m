@@ -78,11 +78,11 @@ classdef DifferentialVariationalInequalities < handle
         % code generation and compututation of dynamics         
         codeGen(plant)
         
-        f = computeStateEquation(plant, tau, x, p)
+        f = computeStateEquation_Function(plant, tau, x, p)
         
-        [ftau, fx, fp] = computeStateEquationJacobian(plant, tau, x, p)
+        [ftau, fx, fp] = computeStateEquation_Jacobian(plant, tau, x, p)
         
-        K = computeVIFunc(plant, tau, x, p)
+        K = computeVI_Function(plant, tau, x, p)
     end
        
 end

@@ -28,7 +28,7 @@ end
 % compute value of friction and tangential velocity, and generate a trajectory-time sequence about contact force p for animation
 K = zeros(Dim.p, nStages);
 for n = 1 : nStages
-    K(:, n) = plant.computeVIFunc(tau(:, n), x(:, n), p(:, n));
+    K(:, n) = plant.computeVI_Function(tau(:, n), x(:, n), p(:, n));
 end
 
 pN = [p(1, 1), p(1, :)];

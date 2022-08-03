@@ -40,7 +40,7 @@ if (strcmp(OCPEC.VI_mode, 'SmoothingEquation')) || (strcmp(OCPEC.VI_mode, 'Reg_S
     % w = K
     Iterate.w = zeros(Dim.w, nStages);
     for n = 1 : nStages
-        Iterate.w(:, n) = plant.computeVIFunc(Iterate.tau(:, n), Iterate.x(:, n), Iterate.p(:, n)); 
+        Iterate.w(:, n) = plant.computeVI_Function(Iterate.tau(:, n), Iterate.x(:, n), Iterate.p(:, n)); 
     end   
 elseif strcmp(OCPEC.VI_mode, 'Reg_NCPs')
     % w >= 0

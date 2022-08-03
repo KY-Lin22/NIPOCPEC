@@ -1,5 +1,5 @@
-function [ftau, fx, fp] = computeStateEquationJacobian(plant, tau, x, p)
-%computeStateEquationJacobian
+function [ftau, fx, fp] = computeStateEquation_Jacobian(plant, tau, x, p)
+%computeStateEquation_Jacobian
 %   compute State Equation Jacobian
 
 Dim = plant.Dim;

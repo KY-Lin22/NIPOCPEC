@@ -29,7 +29,7 @@ for n = 1 : nStages
     
     [Gtau_n, Gx_n, Gp_n] = autoGen_Gtau_Gx_Gp(tau_n, x_n, p_n);    
     [Ctau_n, Cx_n, Cp_n, Cw_n] = autoGen_Ctau_Cx_Cp_Cw(tau_n, x_n, p_n, w_n);
-    [ftau_n, fx_n, fp_n] = OCPEC.plant.computeStateEquationJacobian(tau_n, x_n, p_n); 
+    [ftau_n, fx_n, fp_n] = OCPEC.plant.computeStateEquation_Jacobian(tau_n, x_n, p_n); 
     % 
     Gvar.Gtau(:, 1 + (n - 1) * Dim.tau : n * Dim.tau) = Gtau_n;
     Gvar.Gx(:, 1 + (n - 1) * Dim.x : n * Dim.x) = Gx_n;

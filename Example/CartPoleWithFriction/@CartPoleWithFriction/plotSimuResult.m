@@ -7,7 +7,7 @@ Dim = plant.Dim;
 
 K = zeros(Dim.p, nStages);
 for n = 1 : nStages
-    K(:, n) = plant.computeVIFunc(tau(:, n), x(:, n), p(:, n));
+    K(:, n) = plant.computeVI_Function(tau(:, n), x(:, n), p(:, n));
 end
 
 %% plot

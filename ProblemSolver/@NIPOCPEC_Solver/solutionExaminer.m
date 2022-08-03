@@ -18,7 +18,7 @@ printLevel = Option.printLevel;
 FunEval = solver.FunctionEvaluation(solution, sEnd, zEnd, 'Regular');
 K = zeros(Dim.w, nStages);
 for n = 1 : nStages
-    K(:, n) = plant.computeVIFunc(solution.tau(:, n), solution.x(:, n), solution.p(:, n));
+    K(:, n) = plant.computeVI_Function(solution.tau(:, n), solution.x(:, n), solution.p(:, n));
 end
 
 % Jacobian evaluation

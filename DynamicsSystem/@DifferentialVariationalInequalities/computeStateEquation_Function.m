@@ -1,6 +1,6 @@
-function f = computeStateEquation(plant, tau, x, p)
-%computeStateEquation
-%   compute State Equation
+function f = computeStateEquation_Function(plant, tau, x, p)
+%computeStateEquation_Function
+%   compute State Equation Function
 
 if plant.computeInvM
     q_Dim = round(1/2 * plant.Dim.x);

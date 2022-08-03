@@ -31,7 +31,7 @@ end
 % compute value of p, K and generate a trajectory-time sequence for animation
 K = zeros(Dim.p, nStages);
 for n = 1 : nStages
-    K(:, n) = plant.computeVIFunc(tau(:, n), x(:, n), p(:, n));
+    K(:, n) = plant.computeVI_Function(tau(:, n), x(:, n), p(:, n));
 end
 
 p = [p(:, 1), p];
