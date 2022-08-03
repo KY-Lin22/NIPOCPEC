@@ -28,7 +28,8 @@ Iterate.p = zeros(Dim.p, nStages);
 for i = 1 : Dim.p
     if (plant.l(i) == 0) && (plant.u(i) == Inf)
         % nonlinear complementary problem
-        Iterate.p(i, :) = abs(randn(1, nStages)); % p > = 0
+%         Iterate.p(i, :) = abs(randn(1, nStages)); % p > = 0
+        Iterate.p(i, :) = ones(1, nStages); % p > = 0
     else
         % box constraint variation inequality
         Iterate.p(i, :) = repmat(1/2*(plant.l(i) + plant.u(i)), 1, nStages); % l < = p < = u
@@ -36,8 +37,8 @@ for i = 1 : Dim.p
 end
 % w
 if (strcmp(OCPEC.VI_mode, 'SmoothingEquation')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
-    Iterate.w = zeros(Dim.w, nStages);
     % w = K
+    Iterate.w = zeros(Dim.w, nStages);
     for n = 1 : nStages
         Iterate.w(:, n) = plant.computeVIFunc(Iterate.tau(:, n), Iterate.x(:, n), Iterate.p(:, n)); 
     end   

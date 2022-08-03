@@ -226,9 +226,9 @@ for k = 1 : maxIterNum + 1
     
     %% Step 9: Update Perturbed Parameter and Prepare for Next Iteration
     % update perturbed parameter s, z and FunEval_k
-    if (strcmp(IterateType_k,'MLS')) || (strcmp(IterateType_k, 'SOC'))
+    if (strcmp(IterateType_k,'MLS')) || (strcmp(IterateType_k, 'SOC')) || (strcmp(IterateType_k,'FRP'))
         [s_k, z_k, FunEval_k] = solver.computePerturedParam(Iterate_k, FunEval_k, s, z);
-    elseif (strcmp(IterateType_k,'FRP')) || (strcmp(IterateType_k,'Prev'))
+    elseif  (strcmp(IterateType_k,'Prev'))
         s_k = s;
         z_k = z;        
     else
