@@ -67,35 +67,16 @@ subplot(1,1,1)
 % base
 plot(baseline_X, baseline_Y, '.-k', 'MarkerSize', 1, 'LineWidth', 2);
 hold on
-% init state
-plot(cartPole_X(1 : 4, 1), cartPole_Y(1 : 4, 1), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
-hold on
-plot(cartPole_X(5 : 6, 1), cartPole_Y(5 : 6, 1), '.-', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 2, 'LineWidth', 1);
-hold on
-% some middle state
-% MS1 = 24;
-% plot(cartPole_X(1 : 4, MS1), cartPole_Y(1 : 4, MS1), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
-% hold on
-% plot(cartPole_X(5 : 6, MS1), cartPole_Y(5 : 6, MS1), '.-', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 2, 'LineWidth', 1);
-% hold on
-% %
-% MS2 = 38;
-% plot(cartPole_X(1 : 4, MS2), cartPole_Y(1 : 4, MS2), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
-% hold on
-% plot(cartPole_X(5 : 6, MS2), cartPole_Y(5 : 6, MS2), '.-', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 2, 'LineWidth', 1);
-% hold on
-% %
-% MS3 = 50;
-% plot(cartPole_X(1 : 4, MS3), cartPole_Y(1 : 4, MS3), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
-% hold on
-% plot(cartPole_X(5 : 6, MS3), cartPole_Y(5 : 6, MS3), '.-', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 2, 'LineWidth', 1);
-% hold on
 
-% end state
-plot(cartPole_X(1 : 4, end), cartPole_Y(1 : 4, end), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
-hold on
-plot(cartPole_X(5 : 6, end), cartPole_Y(5 : 6, end), '.-', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 2, 'LineWidth', 1);
-hold on
+% init, some middle and end state
+MS_ID = [1; nStages + 1];
+for i = 1 : size(MS_ID, 1)
+    MSi = MS_ID(i);
+    plot(cartPole_X(1 : 4, MSi), cartPole_Y(1 : 4, MSi), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
+    hold on
+    plot(cartPole_X(5 : 6, MSi), cartPole_Y(5 : 6, MSi), '.-', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 2, 'LineWidth', 1);
+    hold on
+end
 % trajectory
 cart = plot(cartPole_X(1 : 4, 1), cartPole_Y(1 : 4, 1), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 2, 'LineWidth', 1);
 hold on

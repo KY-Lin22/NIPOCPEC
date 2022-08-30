@@ -80,23 +80,13 @@ mov = zeros(height*3/2, width*3/2, 1, nStages + 1, 'uint8');
 subplot(1, 1, 1)
 plot(baseline_X, baseline_Y, '.-k', 'MarkerSize', 1, 'LineWidth', 2);
 hold on
-% init state
-plot(Hopper_X(:, 1), Hopper_Y(:, 1), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1)
-hold on
-% show some middle state
-% MS1 = 50;
-% plot(Hopper_X(:, MS1), Hopper_Y(:, MS1), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1)
-% hold on
-% MS2 = 62;
-% plot(Hopper_X(:, MS2), Hopper_Y(:, MS2), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1)
-% hold on
-% MS3 = 82;
-% plot(Hopper_X(:, MS3), Hopper_Y(:, MS3), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1)
-% hold on
-
-% end state
-plot(Hopper_X(:, end), Hopper_Y(:, end), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1)
-hold on
+% init, some middle and end state
+MS_ID = [1; nStages + 1];
+for i = 1 : size(MS_ID, 1)
+    MSi = MS_ID(i);
+    plot(Hopper_X(:, MSi), Hopper_Y(:, MSi), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1)
+    hold on
+end
 % trajectory
 Hopper = plot(Hopper_X(:, 1), Hopper_Y(:, 1), '.-', 'Color', [0 0.4470 0.7410], 'MarkerSize', 15, 'LineWidth', 1);
 hold on
