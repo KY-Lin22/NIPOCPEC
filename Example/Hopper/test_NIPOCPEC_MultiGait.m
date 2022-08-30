@@ -4,7 +4,6 @@ clc
 delete Hopper.gif
 delete Gen_InitialGuess.mat
 [~, ~, ~] = rmdir('autoGen_CodeFiles', 's');
-
 %% create an dynamics system 
 timeStep = 0.01;
 mass = [1; 0.1];
@@ -13,32 +12,37 @@ mu = 0.45;
 plant = Hopper(timeStep, mass, inertia, mu);
 tau_Max = [50; 50; 100];
 tau_Min = [-50; -50; -100];
-x_Max = [0.8; 1.5; pi; 0.5; 10; 10; 5; 5];
-x_Min = [0; 0; -pi; 0.1; -10; -10; -5; -5];
+x_Max = [0.8; 0.7; pi; 0.5; 10; 10; 5; 5];
+x_Min = [0; 0; -pi; 0.2; -10; -10; -5; -5];
 plant.setDynVarLimit(tau_Max, tau_Min, x_Max, x_Min) ;
 plant.codeGen();
 
 %% formulate an OCPEC problem 
-nStages = 100;
+nStages = 200;
 InitState = [0.1; 0.5; 0; 0.5; 0; 0; 0; 0];
-MidState = [0.4; 0.8; 0; 0.1; 0; 0; 0; 0];
-RefState = [0.7; 0.5; 0; 0.5; 0; 0; 0; 0];
+MidState1 = [0.3; 0.65; 0; 0.2; 0; 0; 0; 0];
+MidState2 = [0.4; 0.5; 0; 0.5; 0; 0; 0; 0];
+MidState3 = [0.6; 0.65; 0; 0.2; 0; 0; 0; 0];
+RefState  = [0.7; 0.5; 0; 0.5; 0; 0; 0; 0];
 
-xRef_init_mid = TrajectoryInterpolation(InitState, MidState, 50);
-xRef_mid_end = TrajectoryInterpolation(MidState, RefState, 50);
-StageCost.xRef = [xRef_init_mid, xRef_mid_end];
+xRef_init_mid1 = TrajectoryInterpolation(InitState, MidState1, 40);
+xRef_mid1_mid2 = TrajectoryInterpolation(MidState1, MidState2, 40);
+xRef_mid2_mid3 = TrajectoryInterpolation(MidState2, MidState3, 40);
+xRef_mid3_end = TrajectoryInterpolation(MidState3, RefState, 40);
+xRef_end_end = TrajectoryInterpolation(RefState, RefState, 40);
 
+StageCost.xRef = [xRef_init_mid1, xRef_mid1_mid2, xRef_mid2_mid3, xRef_mid3_end, xRef_end_end];
 StageCost.tauRef = repmat([0; 0; 0], 1, nStages);
-StageCost.xWeight = [50; 50; 20; 50; 0.1; 0.1; 0.1; 0.1];
+StageCost.xWeight = [100; 100; 100; 100; 0.1; 0.1; 0.1; 0.1];
 StageCost.tauWeight = [0.1; 0.1; 0.001]; 
 
 TerminalCost.xRef = RefState;
 TerminalCost.tauRef = [0; 0; 0];
-TerminalCost.xWeight = [50; 50; 50; 50; 0.1; 0.1; 0.1; 0.1];
-TerminalCost.tauWeight = [0.1; 0.1; 0.001];
+TerminalCost.xWeight = [100; 100; 100; 100; 0.1; 0.1; 0.1; 0.1];
+TerminalCost.tauWeight = [0; 0; 0];
 
 % show initial and reference configuration of given plant
-plotConfiguration(plant, InitState, [InitState, MidState, RefState])
+plotConfiguration(plant, InitState, [InitState, MidState1, MidState2, MidState3, RefState])
 
 OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'Reg_Scholtes');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes'  
 
@@ -77,7 +81,7 @@ solver.Option.employFeasibilityRestorationPhase = true;
 solver.Option.zInit = 1e-1; 
 solver.Option.zEnd  = 1e-4;
 solver.Option.sInit = 1e-1;
-solver.Option.sEnd  = 1e-3;
+solver.Option.sEnd  = 1e-7;
 
 % show solver information
 solver.showInfo();
@@ -88,6 +92,8 @@ solver.generateInitialGuess();
 % load initial guess
 Gen_InitialGuess = load('Gen_InitialGuess.mat');
 IterateInit = Gen_InitialGuess.Iterate;
+IterateInit.x = StageCost.xRef;
+IterateInit.tau = randn(OCPEC.Dim.tau, nStages);
 % 
 timeTest_Num = 1;
 timeTest_TimeElapsed = 0;
@@ -124,6 +130,7 @@ for i = 1 : robustTest_Num
     
     solver.generateInitialGuess();
     Gen_InitialGuess = load('Gen_InitialGuess.mat');    
+    Gen_InitialGuess.Iterate.x = StageCost.xRef;
     [solution, Info] = solver.solveOCPEC(Gen_InitialGuess.Iterate);
     RobustTestRecord.InitialGuess{i, 1} = Gen_InitialGuess.Iterate;
     RobustTestRecord.solution{i, 1} = solution;
