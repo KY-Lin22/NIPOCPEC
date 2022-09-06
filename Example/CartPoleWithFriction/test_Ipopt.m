@@ -6,8 +6,8 @@ delete CartPoleWithFriction.gif
 addpath('E:\GitHub\CasADi\casadi-windows-matlabR2016a-v3.5.5')
 import casadi.*
 
-timeStep = 0.04; 
-nStages = 100; 
+timeStep = 0.01; 
+nStages = 400; 
 s = 1e-7; % slack 
 z = 1e-4;
 %% Dynamics
@@ -150,7 +150,7 @@ lbg = reshape(lbg, g_Dim * nStages, 1);
 ubg = reshape(ubg, g_Dim * nStages, 1);
 
 %
-robustTest_Num = 50;
+robustTest_Num = 1;
 RobustTestRecord.InitialGuess = cell(robustTest_Num, 1);
 RobustTestRecord.solution = cell(robustTest_Num, 1);
 successCase = 0;

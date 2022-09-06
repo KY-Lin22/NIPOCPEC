@@ -6,7 +6,7 @@ delete Gen_InitialGuess.mat
 [~, ~, ~] = rmdir('autoGen_CodeFiles', 's');
 
 %% create an dynamics system 
-timeStep = 0.04;
+timeStep = 0.01;
 plant = CartPoleWithFriction(timeStep, [], [], []);
 tau_Max = 30;
 tau_Min = -30;
@@ -16,7 +16,7 @@ plant.setDynVarLimit(tau_Max, tau_Min, x_Max, x_Min) ;
 plant.codeGen();
 
 %% formulate an OCPEC problem 
-nStages = 100;
+nStages = 400;
 InitState = [1; 0/180*pi; 0; 0];
 EndState = [1; 180/180*pi; 0; 0];
 StageCost.xRef = repmat(EndState, 1, nStages);
@@ -62,7 +62,7 @@ solver.Option.employFeasibilityRestorationPhase = true;
 solver.Option.zInit = 1e-1; 
 solver.Option.zEnd  = 1e-4;
 solver.Option.sInit = 1e-1;
-solver.Option.sEnd  = 1e-5;
+solver.Option.sEnd  = 1e-7;
 
 % show solver information
 solver.showInfo();
@@ -87,9 +87,9 @@ disp(['timeTest_iterations: ', num2str(timeTest_IterNum), '; ',...
       'timeTest_TimeElapsed: ', num2str(timeTest_TimeElapsed,'%10.3f'), ' s; ',...
       'timeTest_TimeAverage: ', num2str(1000 * timeTest_TimeElapsed /timeTest_IterNum, '%10.2f'), ' ms/Iter' ]);
 
-% show result 
-% plant.plotSimuResult(timeStep, InitState, solution.tau, solution.x, solution.p)
-% plant.animateTrajectory(timeStep, InitState, solution.tau, solution.x, solution.p)
+%% show result 
+plant.plotSimuResult(timeStep, InitState, solution.tau, solution.x, solution.p)
+plant.animateTrajectory(timeStep, InitState, solution.tau, solution.x, solution.p)
 % solver.showResult(Info)
 
 %% solving OCPEC (robust test)

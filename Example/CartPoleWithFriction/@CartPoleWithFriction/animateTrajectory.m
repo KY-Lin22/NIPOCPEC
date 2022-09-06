@@ -11,8 +11,8 @@ nStages = size(x, 2);
 timeAxis = 0 : simuTimeStep : nStages * simuTimeStep;
 
 % get baseline coordinate
-baseline_X = [DynVarLimit.x_Min(1, 1) - linkLength(1);...
-              DynVarLimit.x_Max(1, 1) + linkLength(1)];
+baseline_X = [min(x(1, :)) - linkLength(1);...
+              max(x(1, :)) + linkLength(1)];
 baseline_Y = [- 0.5 * cartHeight(1);...
               - 0.5 * cartHeight(1)];
 % get cartPole configuration sequence based on given x sequence
@@ -86,7 +86,7 @@ PoleEnd = plot(trajPoleEnd_X{1, 1}, trajPoleEnd_Y{1, 1}, '.--r', 'MarkerSize', 1
 xlabel('x_c [m]')
 ylabel('y_c [m]')
 axis equal
-axisLimit_X = [-1; 7];
+axisLimit_X = baseline_X;
 axisLimit_Y = [-1.2; 1.2];
 % axisLimit_Y = [- 0.5 * cartHeight(1) - linkLength(1);...
 %                0.5 * cartHeight(1) + linkLength(1)]; 
