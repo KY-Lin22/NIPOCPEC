@@ -30,7 +30,7 @@ TerminalCost.tauWeight = 1;
 % show initial and reference configuration of given plant
 plant.plotConfiguration(InitState, TerminalCost.xRef)
 
-OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'Reg_Scholtes');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes' 
+OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'SmoothingEquation');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes' 
 
 OCPEC.setEqualityConstraints([]);
 OCPEC.setInequalityConstraints([]);
@@ -55,13 +55,13 @@ solver.Option.RegularParam.nu_J = 1e-7;
 solver.Option.RegularParam.nu_G = 1e-7;
 solver.Option.RegularParam.nu_H = 0;
 
-solver.Option.LineSearch.stepSize_Min = 0.01;
+solver.Option.LineSearch.stepSize_Min = 0.001;
 solver.Option.employFeasibilityRestorationPhase = true;
 
 solver.Option.zInit = 1e-1; 
 solver.Option.zEnd  = 1e-4;
 solver.Option.sInit = 1e-1;
-solver.Option.sEnd  = 1e-4;
+solver.Option.sEnd  = 1e-2;
 
 % show solver information
 solver.showInfo();
@@ -86,9 +86,9 @@ disp(['timeTest_iterations: ', num2str(timeTest_IterNum), '; ',...
       'timeTest_TimeElapsed: ', num2str(timeTest_TimeElapsed,'%10.3f'), ' s; ',...
       'timeTest_TimeAverage: ', num2str(1000 * timeTest_TimeElapsed /timeTest_IterNum, '%10.2f'), ' ms/Iter' ]);
 
-% show result 
-% plant.plotSimuResult(timeStep, InitState, solution.tau, solution.x, solution.p)
-% plant.animateTrajectory(timeStep, InitState, solution.tau, solution.x, solution.p)
+%% show result 
+plant.plotSimuResult(timeStep, InitState, solution.tau, solution.x, solution.p)
+plant.animateTrajectory(timeStep, InitState, solution.tau, solution.x, solution.p)
 % solver.showResult(Info)
 
 %% solving OCPEC (robust test)

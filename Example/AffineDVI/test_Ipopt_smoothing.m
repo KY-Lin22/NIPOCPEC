@@ -8,8 +8,9 @@ import casadi.*
 
 timeStep = 0.01; 
 nStages = 100; 
-s = 1e-3; % slack 
+s = 5e-4; % slack 
 z = 1e-4;
+
 %% Dynamics
 % dynamics variables
 tau_Dim = 1;% control dim
@@ -17,6 +18,7 @@ x_Dim = 2; % state dim
 p_Dim = 1; % equilibrium var dim
 w_Dim = p_Dim; % auxiliary var dim
 u_Dim = tau_Dim + p_Dim + w_Dim; % u = [tau; p; w]
+
 
 x = SX.sym('x', x_Dim);
 u = SX.sym('u', u_Dim);
@@ -43,16 +45,15 @@ E = 3;
 K = C * x + D * p + E * tau;
 K_func = Function('K',{x,u}, {K}, {'x', 'u'}, {'K'});
 
-% reformulate equilibrium dynamics as a set of inequality and equality constriants using Scholtes reformulation
+% reformulate equilibrium dynamics as a smoothing equation using CHKS smoothing function
+lpw = EqlbmDyn_l - (p - w);
+upw = EqlbmDyn_u - (p - w);
+h = 1/2*(EqlbmDyn_l + sqrt(lpw^2 + 4 * s^2)) ...
+  + 1/2*(EqlbmDyn_u - sqrt(upw^2 + 4 * s^2));
 
-BVI = [p - EqlbmDyn_l;...
-    EqlbmDyn_u - p;...%  p in [l, u]   
-    w - K;...% auxiliary variable
-    s - (p - EqlbmDyn_l) * w;...
-    s + (EqlbmDyn_u - p) * w];% regularization
+BVI = [w - K;...% auxiliary variable
+    p - h];% smoothing equation
 BVI_func = Function('BVI', {x,u}, {BVI}, {'x', 'u'}, {'BVI'});
-lbg_BVI = [0; 0; 0; 0; 0];
-ubg_BVI = [Inf; Inf; 0; Inf; Inf];
 
 %% OCPEC
 % specify initial and end state, cost ref and weight matrix
@@ -91,8 +92,6 @@ g_Dim = size([f; BVI], 1);
 g = SX.sym('g', g_Dim, nStages); % constraint function
 lbg = zeros(g_Dim, nStages);
 ubg = zeros(g_Dim, nStages);
-lbg(size(f, 1) + 1 : end, :) = repmat(lbg_BVI, 1, nStages);
-ubg(size(f, 1) + 1 : end, :) = repmat(ubg_BVI, 1, nStages);
 
 for n = 1 : nStages
     if n == 1
@@ -191,7 +190,7 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
     tau_Opt = u_Opt(1 : tau_Dim, :);
     p_Opt = u_Opt(tau_Dim + 1 : tau_Dim + p_Dim, :);
     cstr = reshape(full(solution.g), g_Dim, nStages);
-    EQ = cstr(5, :); % w - K = 0
+    EQ = cstr(3, :); % w - K = 0
     DynF = cstr(1 : x_Dim, :); % 1 : 2       
     G = [[x_Opt; tau_Opt] - repmat([x_Min; tau_Min], 1, nStages);...
         repmat([x_Max; tau_Max], 1, nStages) - [x_Opt; tau_Opt]];    
@@ -200,9 +199,11 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
         K_n = K_func(x_Opt(:, n), u_Opt(:, n));
         K_Value(:, n) = full(K_n);
     end
-    lpu = cstr(x_Dim + 1: x_Dim + 2 * p_Dim, :);
+    lpu = [p_Opt - EqlbmDyn_l * ones(p_Dim, nStages);...
+        EqlbmDyn_u * ones(p_Dim, nStages) - p_Opt];
+    
     G_residual = min([zeros(2 * (x_Dim + tau_Dim) * nStages, 1), reshape(G, [], 1)], [], 2);
-    pK_residual = min([zeros(2 * p_Dim * nStages, 1), reshape(lpu, [], 1)], [], 2); % 3 : 4   
+    pK_residual = min([zeros(2 * p_Dim * nStages, 1), reshape(lpu, [], 1)], [], 2);    
     
     Complementarity_pK = zeros(p_Dim, nStages);
     for n = 1 : nStages
@@ -223,6 +224,7 @@ if strcmp(solver.stats.return_status, 'Solve_Succeeded')
 end
 
 end
+
 save('RobustTest_IPOPT_Data.mat', 'RobustTestRecord');
 disp('robustTest')
 disp(['success/total: ', num2str(successCase), '/', num2str(robustTest_Num)])
