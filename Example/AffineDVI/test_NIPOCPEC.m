@@ -46,7 +46,7 @@ solver = NIPOCPEC_Solver(OCPEC);
 solver.codeGen();
 
 %% set option and generate initial guess
-solver.Option.maxIterNum = 100;
+solver.Option.maxIterNum = 500;
 solver.Option.Tolerance.KKT_Error_Total = 1e-2;
 solver.Option.Tolerance.KKT_Error_Feasibility = 1e-4;
 solver.Option.Tolerance.KKT_Error_Stationarity = 1e-4;
@@ -55,13 +55,13 @@ solver.Option.RegularParam.nu_J = 1e-7;
 solver.Option.RegularParam.nu_G = 1e-7;
 solver.Option.RegularParam.nu_H = 0;
 
-solver.Option.LineSearch.stepSize_Min = 0.001;
+solver.Option.LineSearch.stepSize_Min = 0.0001;% smoothing 0.0001; reg: 0.01
 solver.Option.employFeasibilityRestorationPhase = true;
 
 solver.Option.zInit = 1e-1; 
-solver.Option.zEnd  = 1e-4;
-solver.Option.sInit = 1e-1;
-solver.Option.sEnd  = 1e-2;
+solver.Option.zEnd  = 1e-2;
+solver.Option.sInit = 1e-3;
+solver.Option.sEnd  = 1e-3;
 
 % show solver information
 solver.showInfo();
