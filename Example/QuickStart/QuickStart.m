@@ -72,14 +72,14 @@ OCPEC.showInfo()
 % using Class NIPOCPEC_Solver to create a NIPOCPEC_Solver object
 solver = NIPOCPEC_Solver(OCPEC);
 
-% set option 
+% set solver option 
 solver.Option.maxIterNum = 500;
 solver.Option.Tolerance.KKT_Error_Total = 1e-2;
 solver.Option.Tolerance.KKT_Error_Feasibility = 1e-4;
 solver.Option.Tolerance.KKT_Error_Stationarity = 1e-4;
 solver.Option.zInit = 1e-1; 
-solver.Option.zEnd  = 1e-2;
-solver.Option.sInit = 1e-3;
+solver.Option.zEnd  = 1e-3;
+solver.Option.sInit = 1e-1;
 solver.Option.sEnd  = 1e-3;
 
 % show solver information
