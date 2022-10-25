@@ -1,4 +1,4 @@
-%%  A demo for quick start of NIPOCPEC
+%%  A demo for quick start of NIPOCPEC using an affine DVI example
 clear all
 clc
 delete Gen_InitialGuess.mat
@@ -72,9 +72,6 @@ OCPEC.showInfo()
 % using Class NIPOCPEC_Solver to create a NIPOCPEC_Solver object
 solver = NIPOCPEC_Solver(OCPEC);
 
-% generate necessary code files
-solver.codeGen();
-
 % set option 
 solver.Option.maxIterNum = 500;
 solver.Option.Tolerance.KKT_Error_Total = 1e-2;
@@ -87,6 +84,9 @@ solver.Option.sEnd  = 1e-3;
 
 % show solver information
 solver.showInfo();
+
+% generate necessary code files
+solver.codeGen();
 
 % generate initial guess
 solver.generateInitialGuess();
