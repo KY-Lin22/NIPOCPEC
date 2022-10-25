@@ -14,7 +14,7 @@ classdef DifferentialVariationalInequalities < handle
     end
     
     properties
-        codeOptimize; % logical, flag to determine whether optimizes code in matlabFunction
+        codeOptimize = true; % logical, flag to determine whether optimizes code in matlabFunction
         computeInvM = false; % logical, flag for the computation of system dynamics dx = f(tau, x, p)
                              % (1)false: the formulation of state equation f(tau, x, p) is provided
                              %           hence it does not need to compute InvM explicitly 
