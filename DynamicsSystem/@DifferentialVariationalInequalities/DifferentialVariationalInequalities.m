@@ -1,6 +1,6 @@
 classdef DifferentialVariationalInequalities < handle
     %% DifferentialVariationalInequalities: Superclass to construct dynamics system in the form of DVI
-    %   We specify DVI as a dynamics version of BVI
+    %   We specify DVI as a combination of ODE and a dynamics version of BVI
     %   
     
     properties
