@@ -30,7 +30,7 @@ TerminalCost.tauWeight = 1;
 % show initial and reference configuration of given plant
 plant.plotConfiguration(InitState, TerminalCost.xRef)
 
-OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'SmoothingEquation');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes' 
+OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'Reg_Scholtes');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes' 
 
 OCPEC.setEqualityConstraints([]);
 OCPEC.setInequalityConstraints([]);
@@ -59,8 +59,8 @@ solver.Option.LineSearch.stepSize_Min = 0.0001;% smoothing 0.0001; reg: 0.01
 solver.Option.employFeasibilityRestorationPhase = true;
 
 solver.Option.zInit = 1e-1; 
-solver.Option.zEnd  = 1e-2;
-solver.Option.sInit = 1e-3;
+solver.Option.zEnd  = 1e-3;
+solver.Option.sInit = 1e-1;
 solver.Option.sEnd  = 1e-3;
 
 % show solver information
