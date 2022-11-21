@@ -5,8 +5,8 @@ function setDynamics(plant)
 y = plant.tau;
 
 %% set state equation
-f1 = 3;
-f2 = 1;
+f1 = 3;% switch function < 0
+f2 = 1;% switch function > 0
 f = f1 * (1 - y) + f2 * y;
 
 plant.f = f;
