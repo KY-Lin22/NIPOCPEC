@@ -10,18 +10,20 @@ timeStep = 0.01;
 OscillatorParam.convergeSpeed1 = 50; % control the speed for the oscillator to converge to the limit cycle (rho_1)
 OscillatorParam.convergeSpeed2 = 50; % control the speed for the oscillator to converge to the limit cycle (rho_2)
 OscillatorParam.radiusLimitCycle = 1; % radius of the limit cycle
-OscillatorParam.periodLimitCycle = 0.6; % period of the limit cycle
-OscillatorParam.dutyFactor = 0.5; % duty factor determining the fraction of rho_2 > 0 in a whole period
+OscillatorParam.periodLimitCycle = 0.3; % period of the limit cycle
+OscillatorParam.dutyFactor = 0.4; % duty factor determining the fraction of rho_2 > 0 in a whole period
 OscillatorParam.radiusSmoothVaries = 50; % ensure radiusLimitCycle varies smoothly across different half planes
-OscillatorParam.InitPhase = [0; pi; 0; pi];
-FootVelFuncParam.k_N = 0.5;
-FootVelFuncParam.k_T = 0.25;
+OscillatorParam.InitPhase = [0; 0; pi; pi];
+FootVelFuncParam.k_N = 0.1;
+FootVelFuncParam.k_T = 0.1;
 plant = PeriodicDVI(timeStep, OscillatorParam, FootVelFuncParam);
 
 plant.codeGen();
 
 %% formulate an OCPEC problem 
-nStages = 180;
+nStages = 60;
+x_Init = 0.3;
+linkLength1 = 0.267;
 num_Osci = length(OscillatorParam.InitPhase);
 InitState = zeros(4 * num_Osci, 1);
 for i = 1 : num_Osci
@@ -29,11 +31,15 @@ for i = 1 : num_Osci
     InitRadius = OscillatorParam.radiusLimitCycle;
     InitState_HolfOsc_i = [InitRadius * cos(InitPhase_i);...
         InitRadius * sin(InitPhase_i)];% holf oscillator
-%     InitState_fpt_i = [FootVelFuncParam.k_N * 1/pi * (cos(pi * InitState_HolfOsc_i(1)) + 1);...
-%         FootVelFuncParam.k_T * 2/pi * (sin(-pi/2 * InitState_HolfOsc_i(1)) + 1)]; % foot position
-    InitState_fpt_i = [0;0];
-    InitState(1 + (i - 1) * 4 : 4 + (i - 1) * 4) = [InitState_HolfOsc_i;...
-        InitState_fpt_i];
+    % for the case that num_Osci = 4
+    if (i == 1) || (i == 2)
+        % front leg
+        InitState_fpt_i = [0; x_Init + linkLength1];
+    elseif (i == 3) || (i == 4)
+        % hind leg
+        InitState_fpt_i = [0; x_Init];
+    end    
+    InitState(1 + (i - 1) * 4 : 4 + (i - 1) * 4) = [InitState_HolfOsc_i; InitState_fpt_i];
 end
 [state, phase, radius] = plant.systemSimulation(InitState, nStages, timeStep);
 TerminalState = state(:, end);
@@ -94,10 +100,10 @@ solver.codeGen();
 %% set option and generate initial guess
 solver.Option.maxIterNum = 500;
 solver.Option.Tolerance.KKT_Error_Total = 1e-2;
-solver.Option.Tolerance.KKT_Error_Feasibility = 1e-2;
+solver.Option.Tolerance.KKT_Error_Feasibility = 1e-4;
 solver.Option.Tolerance.KKT_Error_Stationarity = 1e-2;
 
-solver.Option.LineSearch.stepSize_Min = 0.005;
+solver.Option.LineSearch.stepSize_Min = 0.001;
 solver.Option.employFeasibilityRestorationPhase = true;
 solver.Option.FRP.maxIterNum = 50;
 solver.Option.zInit = 1e-1; 
@@ -120,14 +126,16 @@ IterateInit.x = state;
 
 %%
 plant.animateSystemSimulationResult(InitState, solution.x, nStages, timeStep)
-%%
+
 figure(1)
 for i = 1 : num_Osci
     subplot(num_Osci,1,i)
     footTraj_X_i = [InitState(4 + (i - 1)*4, :), solution.x(4 + (i - 1)*4, :)];
     footTraj_Y_i = [InitState(3 + (i - 1)*4, :), solution.x(3 + (i - 1)*4, :)];
     plot(footTraj_X_i,footTraj_Y_i, 'r', 'LineWidth',1.2)
-    axisLimit_X = [min(footTraj_X_i) - 0.1; max(footTraj_X_i) + 0.1];
+    axisLimit_X = [x_Init - 0.1; x_Init + 4 * linkLength1 + 0.1];
     axisLimit_Y = [min(footTraj_Y_i); max(footTraj_Y_i) + 0.1];
     axis([axisLimit_X; axisLimit_Y]);
 end
+
+save('PeriodicDVI_InitGuess.mat', 'InitState', 'solution', 'OscillatorParam', 'FootVelFuncParam', 'x_Init');

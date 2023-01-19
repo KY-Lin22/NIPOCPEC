@@ -31,6 +31,25 @@ height = pos(4);
 % define movie record
 mov = zeros(height*3/2, width*3/2, 1, nStages + 1, 'uint8');
 
+% axis limit
+axisLimit_X_Osci = zeros(num_Osci, 2);
+axisLimit_Y_Osci = zeros(num_Osci, 2);
+axisLimit_X_FootTraj = zeros(num_Osci, 2);
+axisLimit_Y_FootTraj = zeros(num_Osci, 2);
+for i = 1 : num_Osci
+    state_extend_i = state_extend(1 + (i - 1) * 4 : 4 + (i - 1) * 4, :);
+    % Oscillator
+    axisLimit_X_Osci(i, :) = [min(state_extend_i(1, :)) - 0.5, max(state_extend_i(1, :)) + 0.5];
+    axisLimit_Y_Osci(i, :) = [min(state_extend_i(2, :)) - 0.5, max(state_extend_i(2, :)) + 0.5];    
+    % Foot Trajectory
+    axisLimit_X_FootTraj(i, :) = [min(state_extend_i(4, :)) - 0.1, max(state_extend_i(4, :)) + 0.1];
+    axisLimit_Y_FootTraj(i, :) = [min(state_extend_i(3, :)) - 0.1, max(state_extend_i(3, :)) + 0.1];       
+end
+axisLimit_Osci = [min(axisLimit_X_Osci(:, 1)), max(axisLimit_X_Osci(:, 2)),...
+    min(axisLimit_Y_Osci(:, 1)), max(axisLimit_Y_Osci(:, 2))];
+axisLimit_FootTraj = [min(axisLimit_X_FootTraj(:, 1)), max(axisLimit_X_FootTraj(:, 2)),...
+    min(axisLimit_Y_FootTraj(:, 1)), max(axisLimit_Y_FootTraj(:, 2))];
+
 % pre allocate
 trajstate = cell(num_Osci, 1);
 traj = cell(num_Osci, 1);
@@ -47,22 +66,18 @@ for i = 1 : num_Osci
     hold on
     traj_i = plot(traj_X{i, 1}, traj_Y{i, 1}, '-', 'Color', [1 0 0], 'MarkerSize', 1, 'LineWidth', 1);
     traj{i, 1} = traj_i;
-    axisLimit_X_i = [min(state_extend_i(1, :)) - 0.5; max(state_extend_i(1, :)) + 0.5];
-    axisLimit_Y_i = [min(state_extend_i(2, :)) - 0.5; max(state_extend_i(2, :)) + 0.5];
 %     axis equal
-    axis([axisLimit_X_i; axisLimit_Y_i]);
+    axis(axisLimit_Osci);
     xlabel('\rho_1')
     ylabel('\rho_2')
     
     subplot(num_Osci, 2, 2 + (i - 1) * 2)
     trajfootpos_i = plot(trajfootpos_X{i, 1}, trajfootpos_Y{i, 1}, '.--', 'Color', [0 0.4470 0.7410], 'LineWidth', 1);
     trajfootpos{i, 1} = trajfootpos_i;
-    axisLimit_X_i = [min(state_extend_i(4, :)) - 0.5; max(state_extend_i(4, :)) + 0.5];
-    axisLimit_Y_i = [min(state_extend_i(3, :)) - 0.5; max(state_extend_i(3, :)) + 0.5];
     hold on
-    plot(axisLimit_X_i, [0; 0])
+    plot(axisLimit_FootTraj(1:2), [0; 0])
 %     axis equal
-    axis([axisLimit_X_i; axisLimit_Y_i]);
+    axis(axisLimit_FootTraj);
 end
 
 %%
