@@ -5,7 +5,7 @@ delete Gen_InitialGuess.mat
 [~, ~, ~] = rmdir('autoGen_CodeFiles', 's');
 
 %% create an dynamical system
-% specify dynamics variable dimension and using Class DifferentialVariationalInequalities to create an dynamical system
+% using Class DifferentialVariationalInequalities to create an dynamical system
 tau_Dim = 1;
 x_Dim = 2;
 p_Dim = 1;
