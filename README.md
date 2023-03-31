@@ -23,6 +23,10 @@
 
 See `QuickStart` in `Example`
 
+## Note
+
+A CasADi version can be founded in <https://github.com/KY-Lin22/NIPOCPEC_CasADi>
+
 ## Contact
 
 If you have any questions, please contact the main developer: Kangyu Lin (<lin.kangyu.28e@st.kyoto-u.ac.jp>)
