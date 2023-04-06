@@ -25,7 +25,7 @@ See `QuickStart` in `Example`
 
 ## Note
 
-A CasADi version (only support `Reg_Scholtes' reformulation) can be founded in <https://github.com/KY-Lin22/NIPOCPEC_CasADi>
+A CasADi version (only support `Reg_Scholtes` reformulation) can be founded in <https://github.com/KY-Lin22/NIPOCPEC_CasADi>
 
 ## Contact
 

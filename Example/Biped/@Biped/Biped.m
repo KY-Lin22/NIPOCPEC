@@ -65,7 +65,7 @@ classdef Biped < DifferentialVariationalInequalities
             end 
             %% set symbolic formulation about dynamics
             plant.codeOptimize = true;
-            plant.computeInvM = true;
+            plant.computeStateEquationMethod = 2;
             plant.setDynamics()             
         end
         

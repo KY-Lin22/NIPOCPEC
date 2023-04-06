@@ -12,23 +12,28 @@ switch Option.HessianApproximation
         H     = OCPEC.LS;
         H_FRP = OCPEC.LFRP;        
     case 'Newton'
-        if plant.computeInvM
-            % force GaussNewton
-            H     = OCPEC.LS;
-            H_FRP = OCPEC.LFRP;
-        else
-            if (strcmp(OCPEC.VI_mode, 'Reg_NCPs')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
-                H     = OCPEC.LS    - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
-                    + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) - OCPEC.gamma' * OCPEC.PHI;
-                H_FRP = OCPEC.LFRP - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
-                    + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) - OCPEC.gamma' * OCPEC.PHI;
-            elseif (strcmp(OCPEC.VI_mode, 'SmoothingEquation'))
-                H     = OCPEC.LS    - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
-                    + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) + OCPEC.gamma' * OCPEC.PHI;
-                H_FRP = OCPEC.LFRP - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
-                    + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) + OCPEC.gamma' * OCPEC.PHI;
-            end
-        end       
+        switch plant.computeStateEquationMethod
+            case 1
+                if (strcmp(OCPEC.VI_mode, 'Reg_NCPs')) || (strcmp(OCPEC.VI_mode, 'Reg_Scholtes'))
+                    H     = OCPEC.LS    - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
+                        + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) - OCPEC.gamma' * OCPEC.PHI;
+                    H_FRP = OCPEC.LFRP - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
+                        + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) - OCPEC.gamma' * OCPEC.PHI;
+                elseif (strcmp(OCPEC.VI_mode, 'SmoothingEquation'))
+                    H     = OCPEC.LS    - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
+                        + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) + OCPEC.gamma' * OCPEC.PHI;
+                    H_FRP = OCPEC.LFRP - OCPEC.sigma' * OCPEC.G + OCPEC.eta' * OCPEC.C...
+                        + OCPEC.lambda' * (OCPEC.plant.f * OCPEC.timeStep - OCPEC.x) + OCPEC.gamma' * OCPEC.PHI;
+                end
+            case 2
+                % force GaussNewton
+                H     = OCPEC.LS;
+                H_FRP = OCPEC.LFRP;
+            case 3
+                % force GaussNewton
+                H     = OCPEC.LS;
+                H_FRP = OCPEC.LFRP;
+        end      
     otherwise
         % force 'GaussNewton'
         H     = OCPEC.LS;

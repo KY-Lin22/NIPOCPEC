@@ -15,14 +15,18 @@ classdef DifferentialVariationalInequalities < handle
     
     properties
         codeOptimize = true; % logical, flag to determine whether optimizes code in matlabFunction
-        computeInvM = false; % logical, flag for the computation of system dynamics dx = f(tau, x, p)
-                             % (1)false: the formulation of state equation f(tau, x, p) is provided
-                             %           hence it does not need to compute InvM explicitly 
-                             % (2)true:  the formulation of state equation f(tau, x, p) is given by f = [dq;InvM*H]
-                             %           hence it does need to compute InvM and H explicitly        
-        f; % (Dim.x x 1) symbolic function, state equation
-        M; % (0.5*Dim.x x 1) symbolic function, mass matrix
-        H; % (0.5*Dim.x x 1) symbolic function, nonlinear function including centrifugal/Coriolis force, gravity and external force (control, contact force)
+        computeStateEquationMethod = 1; % double, flag for the computation of system dynamics dx = f(tau, x, p)
+                             % 1: the formulation of state equation f(tau, x, p) is provided
+                             %    hence it does not need to compute InvM explicitly 
+                             % 2: the formulation of state equation f(tau, x, p) is given by f = [dq; InvM*H]
+                             %    hence it does need to compute InvM and H explicitly    
+                             % 3: the formulation of state equation f(tau, x, p) is given by f = [dq; InvM*H; f_given]
+                             %    hence it is the combination of Method 1 and 2
+        f; %  symbolic function, state equation, need to specified in Method 1 (Dim.x x 1) and 3 ((Dim.x - qDim * 2) x 1))
+        M; % (qDim x 1) symbolic function, mass matrix, need to specified in Method 2 and 3 
+        H; % (qDim x 1) symbolic function, nonlinear function including centrifugal/Coriolis force,...
+           %            gravity and external force (control, contact force), need to specified in Method 2 and 3
+        qDim; % (1 x 1) double, dimension of configuration q, need to specified in Method 3
         K; % (Dim.p x 1) symbolic function, function in BVI(l, u, p, K(tau, x, p))
         l; % (Dim.p x 1) double, lower bound in BVI(l, u, p, K(tau, x, p))
         u; % (Dim.p x 1) double, upper bound in BVI(l, u, p, K(tau, x, p))
