@@ -99,6 +99,58 @@ for n = 1 : nStages
 end
 r_eqlb_comp = norm(reshape(pK_comp, [], 1), Inf);
 
+%% Solution Examiner: stationary point properties
+stationaryType = 'specified VI mode does not support stationary properties checking'; % 'SmoothingEquation' and 'Reg_Scholtes' does not support
+ineqTol = 1e-2;
+biactiveSet = false;
+LagMultiplierProduct = zeros(Dim.p, nStages);
+if strcmp(VI_mode, 'Reg_NCPs')
+    if (Record.terminalCond.KKT_S) || (Record.terminalCond.KKT_T)
+        for n = 1 : nStages
+            PHI_Counter = 0;
+            for i = 1 : Dim.p               
+                if (plant.l(i) == 0) && (plant.u(i) == Inf)
+                    % NCP
+                    PHI_i_n = FunEval.PHI(PHI_Counter + 1 : PHI_Counter + 3, n);
+                    gamma_i_n = solution.gamma(PHI_Counter + 1 : PHI_Counter + 3, n);                   
+                    % record lagrangian multiplier product if it is in biactive set
+                    if (PHI_i_n(1) < ineqTol) && (PHI_i_n(2) < ineqTol)
+                        biactiveSet = true;
+                        LagMultiplierProduct(i, n) = gamma_i_n(1)*gamma_i_n(2);
+                    end
+                    PHI_Counter = PHI_Counter + 3;
+                else
+                    % BVI
+                    PHI_i_n = FunEval.PHI(PHI_Counter + 1 : PHI_Counter + 6, n);
+                    gamma_i_n = solution.gamma(PHI_Counter + 1 : PHI_Counter + 6, n);                  
+                    % record lagrangian multiplier product if it is in biactive set
+                    if (PHI_i_n(1) < ineqTol) && (PHI_i_n(2) < ineqTol)
+                        biactiveSet = true;
+                        LagMultiplierProduct(i, n) = gamma_i_n(1)*gamma_i_n(2);
+                    elseif (PHI_i_n(4) < ineqTol) && (PHI_i_n(5) < ineqTol)
+                        biactiveSet = true;
+                        LagMultiplierProduct(i, n) = gamma_i_n(4)*gamma_i_n(5);
+                    end                                       
+                    PHI_Counter = PHI_Counter + 6;
+                end
+            end
+        end
+        % check stationary point properties
+        if biactiveSet
+            if min(reshape(LagMultiplierProduct, [], 1)) >= 0
+                stationaryType = 'solver converges to a C-stationary point';
+            else
+                stationaryType = 'solver converges to a W-stationary point';
+            end
+        else
+            % empty biactive set
+            stationaryType = 'the biactive set is empty, therefore, solver converges to a stationary point that MPEC stationary concepts (S-, M-, C-, W-) are coincide';
+        end
+    else
+        stationaryType = 'solver converges to a non-stationary point';        
+    end
+end
+
 %% creat Info and print message
 % creat Info
 Info.iterProcess = Record;
@@ -111,6 +163,7 @@ Info.solutionMsg.r_eq_C = r_eq_C;
 Info.solutionMsg.r_eq_F = r_eq_F;
 Info.solutionMsg.r_eqlb_ineq = r_eqlb_ineq;
 Info.solutionMsg.r_eqlb_comp = r_eqlb_comp;
+Info.solutionMsg.stationaryType = stationaryType;
 
 % print message
 disp('Done!');
@@ -174,6 +227,8 @@ if (printLevel == 1) || (printLevel == 2)
     disp(['                 .............',   num2str(r_eq_F,'%10.3e'), '(F = 0); ']);
     disp(['- Equilibrium(ineq vio): .....',   num2str(r_eqlb_ineq,'%10.3e'), '(NCP: p >= 0, K >= 0; VI:l <= p <= u); '])
     disp(['             (comp vio): .....',   num2str(r_eqlb_comp,'%10.3e'), '(p * K = 0); '])
+    
+    disp(['(4) Stationary point property: ', stationaryType])
 end
 disp('*----------------------------------------------------------*')
 

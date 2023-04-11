@@ -30,7 +30,7 @@ TerminalCost.tauWeight = 1;
 % show initial and reference configuration of given plant
 plant.plotConfiguration(InitState, TerminalCost.xRef)
 
-OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'Reg_Scholtes');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes' 
+OCPEC = OCPEC_Perturbed(plant, timeStep, nStages, InitState, StageCost, TerminalCost, 'Reg_NCPs');% 'SmoothingEquation', 'Reg_NCPs', 'Reg_Scholtes' 
 
 OCPEC.setEqualityConstraints([]);
 OCPEC.setInequalityConstraints([]);
