@@ -11,21 +11,13 @@
 ## Requirements
 
 - MATLAB 2019b or later  
-- MATLAB Symbolic Math Toolbox
+- CasADi <https://web.casadi.org/>
 
 ## Installation
 
 1. Clone or download `NIPOCPEC`.
 2. Extract the downloaded file.
 3. Open and run `start_NIPOCPEC.m` to add `NIPOCPEC` to your `MATLAB` path
-
-## How to use
-
-See `QuickStart` in `Example`
-
-## Note
-
-A CasADi version (only support `Reg_Scholtes` reformulation) can be founded in <https://github.com/KY-Lin22/NIPOCPEC_CasADi>
 
 ## Contact
 
