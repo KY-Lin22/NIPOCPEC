@@ -8,12 +8,11 @@ classdef OCPEC_Formulation < handle
     %       C(x, u) = 0,
     
     properties
-        TimeHorizon % time horizon
+        timeHorizon % time horizon
         nStages % number of discretized stage
         timeStep % discretization time step
         
         x0 % initial state
-        xRef % reference state     
         
         x % differentiable state
         u % control input
@@ -45,8 +44,8 @@ classdef OCPEC_Formulation < handle
     %% Constructor method
     methods
         function self = OCPEC_Formulation(...
-                TimeHorizon, nStages, timeStep,...
-                x0, xRef,...
+                timeHorizon, nStages, timeStep,...
+                x0, ...
                 x, u, lambda,...
                 xMax, xMin, uMax, uMin,...
                 L_T, L_S,...
@@ -55,12 +54,11 @@ classdef OCPEC_Formulation < handle
             %OCPEC_Formulation: Construct an instance of this class
             %   Detailed explanation goes here
             % time parameter
-            self.TimeHorizon = TimeHorizon;
+            self.timeHorizon = timeHorizon;
             self.nStages = nStages;
             self.timeStep = timeStep;
-            % initial and reference state
+            % initial state
             self.x0 = x0;
-            self.xRef = xRef;
             % variable and their bounds
             self.x = x;
             self.u = u;            
@@ -87,6 +85,20 @@ classdef OCPEC_Formulation < handle
                 'G', size(G, 1), 'C', size(C, 1));          
             % function object
             self.FuncObj = self.createFuncObj();
+
+            %% display OCPEC informulation
+            disp('*---------------------------------- OCPEC Information -----------------------------------*')
+            disp('1. time parameter')
+            disp(['time horizon: ............................... ', num2str(self.timeHorizon)])
+            disp(['discretization stage: ....................... ', num2str(self.nStages)])
+            disp(['time step: .................................. ', num2str(self.timeStep)])            
+            disp('2. problem size')
+            disp(['VI set type: ................................ ', self.VISetType])
+            disp(['number of state variable (x): ............... ', num2str(self.Dim.x)])
+            disp(['number of control variable (u): ............. ', num2str(self.Dim.u)])
+            disp(['number of algebraic variable (lambda): ...... ', num2str(self.Dim.lambda)])
+            disp(['number of path inequality constraint (G): ... ', num2str(self.Dim.G)])
+            disp(['number of path equality constraint (C): ..... ', num2str(self.Dim.C)])            
         end
     end
     %% Other method
