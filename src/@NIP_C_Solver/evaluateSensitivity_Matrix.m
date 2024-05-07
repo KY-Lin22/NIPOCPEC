@@ -8,10 +8,9 @@ function Sensitivity_Matrix = evaluateSensitivity_Matrix(self, PSI_c_grad_sigma,
 %  PSI_g_grad_s,     PSI_g_grad_sigma;...
 %  zeros(Dim.z, 1),  zeros(Dim.z, 1)]
 %
-NLP = self.NLP;
-Y_Node = cumsum([NLP.Dim.h, NLP.Dim.c, NLP.Dim.g, NLP.Dim.z]);
+Y_Node = cumsum([self.NLP.Dim.h, self.NLP.Dim.c, self.NLP.Dim.g, self.NLP.Dim.z]);
 % PSI_g_grad_s
-PSI_g_grad_s = PSI_g_grad_ineq * ones(NLP.Dim.g, 1);
+PSI_g_grad_s = PSI_g_grad_ineq * ones(self.NLP.Dim.g, 1);
 
 %% extract nonzero index and value
 % PSI_c_grad_sigma

@@ -1,22 +1,15 @@
 function [gamma_h_k, gamma_c_k, gamma_g_k, z_k, Info] = LineSearch_Merit(self, beta,...
-    gamma_h, gamma_c, gamma_g, z, dgamma_h, dgamma_c, dgamma_g, dz, p, J, h, PSI_c, PSI_g, J_grad)
+    gamma_h, gamma_c, gamma_g, z, dgamma_h, dgamma_c, dgamma_g, dz,...
+    s, sigma, J, h, PSI_c, PSI_g, J_grad)
 %UNTITLED10 Summary of this function goes here
 %   Detailed explanation goes here
 timeStart = tic;
 
-OCPEC = self.OCPEC;
-NLP = self.NLP;
-Option = self.Option;
-
 % load parameter
-stepSize_min = Option.LineSearch.stepSize_Min;
-stepSize_decayRate = Option.LineSearch.stepSize_DecayRate;
-rho = Option.LineSearch.rho;
-nu_D = Option.LineSearch.nu_D;
-
-% extract parameter
-s = p(1);
-sigma = p(2);
+stepSize_min = self.Option.LineSearch.stepSize_Min;
+stepSize_decayRate = self.Option.LineSearch.stepSize_DecayRate;
+rho = self.Option.LineSearch.rho;
+nu_D = self.Option.LineSearch.nu_D;
 
 %% some quantities at current iterate z
 % directional derivative of cost
@@ -24,7 +17,7 @@ J_DD = J_grad * dz;
 % constraint violation M (L1 norm scaled by time step)
 % - L1 norm follows IPOPT, and also the cost is the sum of stage cost
 % - as a constraint measure, it need to be scaled by time step to consistent with the cost that has been scaled
-M = OCPEC.timeStep * norm([h; PSI_c; PSI_g], 1);
+M = self.OCPEC.timeStep * norm([h; PSI_c; PSI_g], 1);
 % penalty parameter
 beta_Trial = J_DD/((1 - rho) * M);
 if beta >= beta_Trial
@@ -49,16 +42,16 @@ while ~has_found_new_iterate
      gamma_g_trial = gamma_g + stepSize_trial * dgamma_g;
      z_trial       = z       + stepSize_trial * dz;
      % cost
-     J_trial = full(NLP.FuncObj.J(z_trial));
+     J_trial = full(self.NLP.FuncObj.J(z_trial));
      % constraint
-     h_trial = full(NLP.FuncObj.h(z_trial));
-     c_trial = full(NLP.FuncObj.c(z_trial));
-     g_trial = full(NLP.FuncObj.g(z_trial, s));
+     h_trial = full(self.NLP.FuncObj.h(z_trial));
+     c_trial = full(self.NLP.FuncObj.c(z_trial));
+     g_trial = full(self.NLP.FuncObj.g(z_trial, s));
      % FB function
      PSI_c_trial = full(self.FuncObj.PSI_c(gamma_c_trial, c_trial, sigma));
      PSI_g_trial = full(self.FuncObj.PSI_g(gamma_g_trial, g_trial, sigma));
      % constraint infeasibility
-     M_trial = OCPEC.timeStep * norm([h_trial; PSI_c_trial; PSI_g_trial], 1);
+     M_trial = self.OCPEC.timeStep * norm([h_trial; PSI_c_trial; PSI_g_trial], 1);
      % merit
      merit_trial = J_trial + beta_k * M_trial;
      
@@ -92,8 +85,7 @@ switch status
         gamma_h_k = gamma_h;
         gamma_c_k = gamma_c;
         gamma_g_k = gamma_g;
-        z_k = z;
-        
+        z_k = z;      
     case 1
         % success, return the new iterate
         gamma_h_k = gamma_h_trial;

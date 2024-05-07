@@ -3,31 +3,27 @@ function z_Init = preprocessInitialGuess(self, z_Init)
 %   preprocess initial guess z_Init
 import casadi.*
 % load parameter
-NLP = self.NLP;
-OCPEC = self.OCPEC;
-Option = self.Option;
+xDim = self.OCPEC.Dim.x;
+uDim = self.OCPEC.Dim.u;
+lambdaDim = self.OCPEC.Dim.lambda;
+nStages = self.OCPEC.nStages;
+xMin = self.OCPEC.xMin;
+xMax = self.OCPEC.xMax;
+uMin = self.OCPEC.uMin;
+uMax = self.OCPEC.uMax;
+lambdaMin = self.OCPEC.bl;
+lambdaMax = self.OCPEC.bu;
 
-xDim = OCPEC.Dim.x;
-uDim = OCPEC.Dim.u;
-lambdaDim = OCPEC.Dim.lambda;
-nStages = OCPEC.nStages;
-xMin = OCPEC.xMin;
-xMax = OCPEC.xMax;
-uMin = OCPEC.uMin;
-uMax = OCPEC.uMax;
-lambdaMin = OCPEC.bl;
-lambdaMax = OCPEC.bu;
-
-kappa_bound = Option.Init.kappa_bound;
-kappa_interval = Option.Init.kappa_interval;
+kappa_bound = self.Option.Init.kappa_bound;
+kappa_interval = self.Option.Init.kappa_interval;
 
 %% proprocess
 % extract x, u, lambda, eta
-Z_Init = reshape(z_Init, NLP.Dim.z_Node(end), nStages);
+Z_Init = reshape(z_Init, self.NLP.Dim.z_Node(end), nStages);
 
-X_Init      = Z_Init(                    1 : NLP.Dim.z_Node(1), :);
-U_Init      = Z_Init(NLP.Dim.z_Node(1) + 1 : NLP.Dim.z_Node(2), :);
-LAMBDA_Init = Z_Init(NLP.Dim.z_Node(2) + 1 : NLP.Dim.z_Node(3), :);
+X_Init      = Z_Init(                         1 : self.NLP.Dim.z_Node(1), :);
+U_Init      = Z_Init(self.NLP.Dim.z_Node(1) + 1 : self.NLP.Dim.z_Node(2), :);
+LAMBDA_Init = Z_Init(self.NLP.Dim.z_Node(2) + 1 : self.NLP.Dim.z_Node(3), :);
 
 % x_Init
 X_lb = xMin + min([kappa_bound * max([ones(xDim, 1), abs(xMin)], [], 2), kappa_interval * (xMax - xMin)], [], 2);
@@ -57,7 +53,7 @@ lambda_Init = min([max([lambda_lb, lambda_Init], [], 2), lambda_ub], [], 2); % p
 LAMBDA_Init = reshape(lambda_Init, lambdaDim, nStages);
 
 % eta_Init
-F_FuncObj_map = OCPEC.FuncObj.F.map(nStages);
+F_FuncObj_map = self.OCPEC.FuncObj.F.map(nStages);
 ETA_Init = full(F_FuncObj_map(X_Init, U_Init, LAMBDA_Init));
 
 %% group and reshape

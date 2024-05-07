@@ -9,23 +9,20 @@ function KKT_Matrix = evaluateKKT_Matrix(self, h_grad, c_grad, g_grad, LAG_hessi
 %    zeros(Dim.g, Dim.h),   zeros(Dim.g, Dim.c),                   PSI_g_grad_dual - nu_g * eye(Dim.g),   PSI_g_grad_z;...
 %    h_grad',               -c_grad',                              -g_grad',                              Hessian + nu_H * eye(Dim.z)]
 %
-NLP = self.NLP;
-Option = self.Option;
-
 %%
 % regularization parameter and Y node point
-nu_h = Option.RegParam.nu_h;
-nu_c = Option.RegParam.nu_c;
-nu_g = Option.RegParam.nu_g;
-nu_H = Option.RegParam.nu_H;
-Y_Node = cumsum([NLP.Dim.h, NLP.Dim.c, NLP.Dim.g, NLP.Dim.z]);
+nu_h = self.Option.RegParam.nu_h;
+nu_c = self.Option.RegParam.nu_c;
+nu_g = self.Option.RegParam.nu_g;
+nu_H = self.Option.RegParam.nu_H;
+Y_Node = cumsum([self.NLP.Dim.h, self.NLP.Dim.c, self.NLP.Dim.g, self.NLP.Dim.z]);
 % PSI_c_grad_z and PSI_g_grad_z
 PSI_c_grad_z = PSI_c_grad_ineq * c_grad;
 PSI_g_grad_z = PSI_g_grad_ineq * g_grad;
 % diag vector of top left 3 X 3 block matrix
-diagVec = [- nu_h * ones(NLP.Dim.h, 1);...
-    diag(PSI_c_grad_dual) - nu_c * ones(NLP.Dim.c, 1);...
-    diag(PSI_g_grad_dual) - nu_g * ones(NLP.Dim.g, 1)];
+diagVec = [- nu_h * ones(self.NLP.Dim.h, 1);...
+    diag(PSI_c_grad_dual) - nu_c * ones(self.NLP.Dim.c, 1);...
+    diag(PSI_g_grad_dual) - nu_g * ones(self.NLP.Dim.g, 1)];
 
 %% extract nonzero index and value
 % top left 3 X 3 block matrix
@@ -62,7 +59,7 @@ i_nega_g_grad_T = i_nega_g_grad_T + Y_Node(3);
 j_nega_g_grad_T = j_nega_g_grad_T + Y_Node(2);
 
 % Hessian + nu_H * eye(Dim.z)
-[i_hessian, j_hessian, s_hessian] = find(LAG_hessian + nu_H * speye(NLP.Dim.z));
+[i_hessian, j_hessian, s_hessian] = find(LAG_hessian + nu_H * speye(self.NLP.Dim.z));
 i_hessian = i_hessian + Y_Node(3);
 j_hessian = j_hessian + Y_Node(3);
 

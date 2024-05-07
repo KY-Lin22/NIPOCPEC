@@ -5,9 +5,7 @@ function Option = createSolverOption(self)
 Option.printLevel = 2; % 0: print nothing;  
                        % 1: print results
                        % 2: print results and iteration log (should specified recordLevel as 1)
-Option.recordLevel = 1; % 0: record time 
-                        % 1: record time and log
-                        
+
 %% Option for stage 1: non-interior-point method
 % initialization   
 Option.Init.kappa_bound = 1e-2; % scaling parameter for single bound to evaluate perturbation (default 1e-2)
@@ -19,6 +17,7 @@ Option.maxIterNum = 100;
 Option.KKT_scaling_max = 1;
 Option.tol.KKT_error_primal = 1e-6;
 Option.tol.KKT_error_dual = 1e-4;
+Option.tol.KKT_error_complementarity = 1e-4;
 Option.tol.KKT_error_total = 1e-3;
 Option.tol.dYNorm = 1e-6;
 
@@ -46,9 +45,5 @@ Option.Homotopy.kappa_exp = 1.1;
 
 % Newton correction step
 Option.NewtonCorrection.StepNum = 1;
-Option.NewtonCorrection.employLineSearch = 0;
-Option.NewtonCorrection.stepSize_Min = 0.01;
-Option.NewtonCorrection.stepSize_DecayRate = 0.5;% choose in (0,1)
-Option.NewtonCorrection.nu_D = 1e-4;% desired merit function reduction, default 1e-4
 end
 
