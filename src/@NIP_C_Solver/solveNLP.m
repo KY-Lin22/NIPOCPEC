@@ -63,6 +63,8 @@ Log.cost                = zeros(continuationStepNum + 1, 1);
 Log.KKT_error           = zeros(continuationStepNum + 1, 6); % [primal, dual, dual_scaled, complementary, complementary_scaled, total]
 Log.VI_natural_residual = zeros(continuationStepNum + 1, 1);
 Log.timeElapsed         = zeros(continuationStepNum + 1, 1); % elapsed time in each continuation step
+% time
+Time_continuation = struct('Euler_funcEval', 0, 'Euler_stepEval', 0,'Newton_funcEval', 0, 'Newton_stepEval',0, 'total', 0);
 
 %% non-interior-point continuation method (z: previous iterate z_{j-1}, z_j: current iterate z_{j})
 while true
@@ -125,8 +127,7 @@ while true
         end
     end
 
-    %% stage 2: solve the subsequent parameterized NLPs by Euler-Newton continuation method
-    Time_continuation = struct('Euler_funcEval', 0, 'Euler_stepEval', 0,'Newton_funcEval', 0, 'Newton_stepEval',0, 'total', 0);
+    %% stage 2: solve the subsequent parameterized NLPs by Euler-Newton continuation method    
     for j = 1 : continuationStepNum
         % estimate a new parameter for the Euler-Newton continuation step
         p_trial = min([kappa_times .* p, p.^kappa_exp], [], 2);
