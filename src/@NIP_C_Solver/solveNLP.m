@@ -44,7 +44,7 @@ kappa_exp = self.Option.Homotopy.kappa_exp;
 % preproccess initial guess
 z_Init = self.preprocessInitialGuess(z_Init);
 
-%% create record for time and log 
+%% create record for log 
 % evaluate the number of continuation step based on p_Init and p_End
 p_test = p_Init;
 continuationStepNum = 0;
@@ -57,8 +57,6 @@ while true
         continuationStepNum = continuationStepNum + 1;
     end
 end
-% time 
-Time = struct('non_interior_point', 0, 'Euler_funcEval', 0, 'Euler_stepEval', 0,'Newton_funcEval', 0, 'Newton_stepEval',0, 'total', 0);
 % log
 Log.param               = zeros(continuationStepNum + 1, 2); % [s, sigma]
 Log.cost                = zeros(continuationStepNum + 1, 1);
@@ -84,8 +82,8 @@ while true
     KKT_error_complementary_scaled = Info_Stage_1.KKT_error_complementary_scaled;
     KKT_error_total                = Info_Stage_1.KKT_error_total;
     VI_natural_residual            = Info_Stage_1.VI_natural_residual;
-    % record  
-    Time.non_interior_point = Info_Stage_1.Time.total;    
+    Time_non_interior_point        = Info_Stage_1.Time;
+    % record          
     Log.param(1, :) = p';
     Log.cost(1, :)  = J;
     Log.KKT_error(1, :) = [KKT_error_primal, KKT_error_dual, KKT_error_dual_scaled,...
@@ -128,6 +126,7 @@ while true
     end
 
     %% stage 2: solve the subsequent parameterized NLPs by Euler-Newton continuation method
+    Time_continuation = struct('Euler_funcEval', 0, 'Euler_stepEval', 0,'Newton_funcEval', 0, 'Newton_stepEval',0, 'total', 0);
     for j = 1 : continuationStepNum
         % estimate a new parameter for the Euler-Newton continuation step
         p_trial = min([kappa_times .* p, p.^kappa_exp], [], 2);
@@ -136,10 +135,13 @@ while true
         [gamma_h_Eu_j, gamma_c_Eu_j, gamma_g_Eu_j, z_Eu_j, Info_Euler] = self.Euler_predict_step(gamma_h, gamma_c, gamma_g, z, p, p_j);
         % Newton correct step
         [gamma_h_j, gamma_c_j, gamma_g_j, z_j, Info_Newton] = self.Newton_correct_step(gamma_h_Eu_j, gamma_c_Eu_j, gamma_g_Eu_j, z_Eu_j, p_j);
-        Time.Euler_funcEval  = Time.Euler_funcEval  + Info_Euler.time.funcEval;
-        Time.Euler_stepEval  = Time.Euler_stepEval  + Info_Euler.time.stepEval;
-        Time.Newton_funcEval = Time.Newton_funcEval + Info_Newton.time.funcEval;
-        Time.Newton_stepEval = Time.Newton_stepEval + Info_Newton.time.stepEval;
+        % record time
+        Time_continuation.Euler_funcEval  = Time_continuation.Euler_funcEval  + Info_Euler.time.funcEval;
+        Time_continuation.Euler_stepEval  = Time_continuation.Euler_stepEval  + Info_Euler.time.stepEval;
+        Time_continuation.Newton_funcEval = Time_continuation.Newton_funcEval + Info_Newton.time.funcEval;
+        Time_continuation.Newton_stepEval = Time_continuation.Newton_stepEval + Info_Newton.time.stepEval;
+        timeElapsed_j = Info_Euler.time.funcEval + Info_Euler.time.stepEval + Info_Newton.time.funcEval + Info_Newton.time.stepEval;
+        Time_continuation.total = Time_continuation.total + timeElapsed_j;
         % extract quantities (cost, KKT error, VI residual)
         J_j = Info_Newton.cost;
         KKT_error_primal_j               = Info_Newton.KKT_error_primal;
@@ -155,8 +157,7 @@ while true
         Log.KKT_error(j + 1, :) = [KKT_error_primal_j, KKT_error_dual_j, KKT_error_dual_scaled_j,...
             KKT_error_complementary_j, KKT_error_complementary_scaled_j, KKT_error_total_j];
         Log.VI_natural_residual(j + 1, :) = VI_natural_residual_j;
-        Log.timeElapsed(j + 1, :) = Info_Euler.time.funcEval + Info_Euler.time.stepEval ...
-                                  + Info_Newton.time.funcEval + Info_Newton.time.stepEval;
+        Log.timeElapsed(j + 1, :) = timeElapsed_j;
         % print
         if mod(j, 10) ==  0
             disp('---------------------------------------------------------------------------------------------------------------------------------------------')
@@ -203,8 +204,9 @@ end
 % return previous iterate as solution
 z_Opt = z;
 % create Info (basic: time, continuation step  terminal status)
-timeElapsed_Euler_Newton = Time.Euler_funcEval + Time.Euler_stepEval + Time.Newton_funcEval + Time.Newton_stepEval;
-Time.total = Time.non_interior_point + timeElapsed_Euler_Newton;
+Time.non_interior_point = Time_non_interior_point;
+Time.continuation = Time_continuation;
+Time.total = Time_non_interior_point.total + Time_continuation.total;
 Info.Time = Time;
 Info.continuationStepNum = continuationStepNum;
 Info.terminalStatus = terminalStatus;
@@ -230,9 +232,9 @@ disp(Info.terminalMsg)
 disp('2. Continuation Step Message')
 disp(['- Continuation Step: ............................', num2str(Info.continuationStepNum)])
 disp(['- TimeElapsed: ................................. ', num2str(Info.Time.total,'%10.3f'), 's'])
-disp(['- Time for Stage 1: .............................', num2str(Info.Time.non_interior_point,'%10.3f'), 's'])
-disp(['- Time for Euler Newton Step: ...................', num2str(timeElapsed_Euler_Newton,'%10.3f'), 's'])
-disp(['- Average Time for Euler Newton Step: ...........', num2str(1000 * (timeElapsed_Euler_Newton)/Info.continuationStepNum,'%10.2f'), ' ms/step'])
+disp(['- Time for Stage 1: .............................', num2str(Info.Time.non_interior_point.total,'%10.3f'), 's'])
+disp(['- Time for Euler Newton Step: ...................', num2str(Info.Time.continuation.total,'%10.3f'), 's'])
+disp(['- Average Time for Euler Newton Step: ...........', num2str(1000 * (Info.Time.continuation.total)/Info.continuationStepNum,'%10.2f'), ' ms/step'])
 disp('3. Solution Message')
 disp(['- Cost: ........................................ ', num2str(Info.cost,'%10.3e'), '; '])
 disp(['- KKT (primal): ................................ ', num2str(Info.KKT_error_primal,'%10.3e'), '; '])
