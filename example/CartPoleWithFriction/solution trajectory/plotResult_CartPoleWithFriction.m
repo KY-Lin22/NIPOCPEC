@@ -16,40 +16,37 @@ figure(111)
 subplot(4,1,1)
 plot(timeAxis, [OCPEC.x0(1), X_Opt(1, :)], 'r',...
      timeAxis, [OCPEC.x0(2), X_Opt(2, :)], 'g', 'LineWidth',1.2)
-label_cart_posi = '$x_c$';
-label_pole_posi = '$\theta_p$';
-legend(label_cart_posi, label_pole_posi,  'Interpreter','latex')
+legend('$x_c$', '$\theta_p$',  'Interpreter','latex', 'FontSize', 11, 'Location', 'northeast')
 legend('boxoff')
-xlabel('time [s]')
+%xlabel('time [s]')
 ylim([-2, 4])
-title('position') 
+ylabel('Position', 'FontSize', 11) 
 
 subplot(4,1,2)
 plot(timeAxis, [OCPEC.x0(3), X_Opt(3, :)], 'r',...
      timeAxis, [OCPEC.x0(4), X_Opt(4, :)], 'g', 'LineWidth',1.2)
-label_cart_vel = '$\dot{x}_c$';
-label_pole_vel = '$\dot{\theta}_p$';
-legend(label_cart_vel, label_pole_vel, 'Interpreter','latex')
+legend('$\dot{x}_c$', '$\dot{\theta}_p$', 'Interpreter','latex', 'FontSize', 11, 'Location', 'northeast')
 legend('boxoff')
-xlabel('time [s]')
+%xlabel('time [s]')
 ylim([-6, 8])
-title('velocity')  
+ylabel('Velocity', 'FontSize', 11)  
 
 subplot(4,1,3)
 plot(timeAxis(2:end), U_Opt(1,:), 'LineWidth', 1.2)
-xlabel('time [s]')
+legend('$u$', 'Interpreter', 'latex', 'FontSize', 11)
+legend('boxoff')
+%xlabel('time [s]')
 ylim([-35, 35])
-title('control input')
+ylabel('Control', 'FontSize', 11)
 
 subplot(4,1,4)
 plot(timeAxis(2:end), LAMBDA_Opt(1, :), 'r',...
      timeAxis(2:end), F_Opt(1, :), 'b',...
      'LineWidth', 1.2)
-label_friction = '$\lambda$';
-legend(label_friction, label_cart_vel, 'Interpreter','latex') 
+legend('$\lambda$', '$F$', 'Interpreter','latex', 'FontSize', 11, 'Location', 'southeast') 
 legend('boxoff')
-xlabel('time [s]')
+xlabel('Time [s]', 'FontSize', 11)
 ylim([-6, 4])
-title('equilibrium constraint')
+ylabel('Friction', 'FontSize', 11)
 end
 

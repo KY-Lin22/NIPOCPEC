@@ -32,7 +32,4 @@ s_End = 1e-8;
 [z_Opt, Info] = solveNLP_IP_homotopy(OCPEC, NLP, solver, z_Init, s_Init, s_End);
 
 %%
-% save('Data_T_3s_t_5ms_IP.mat', 'z_Opt', 'Info', 'z_Init', 's_Init', 's_End')
-save('Data_IP.mat', 'z_Opt', 'Info', 'z_Init', 's_Init', 's_End')
-%%
 plotResult_CartPoleWithFriction(OCPEC, NLP, z_Opt)

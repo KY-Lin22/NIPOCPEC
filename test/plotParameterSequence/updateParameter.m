@@ -31,6 +31,6 @@ figure(1)
 semilogy(0:continuationStepNum , p(1, :), 'r*-',...
     0:continuationStepNum , p(2, :), 'go-')
 grid on
-legend('s', '\sigma')
-xlabel('continuation step')
-ylabel('parameter value')
+legend('$s$', '$\sigma$', 'Interpreter','latex', 'FontSize', 11)
+xlabel('Continuation step', 'FontSize', 11)
+ylabel('Parameter value', 'FontSize', 11)

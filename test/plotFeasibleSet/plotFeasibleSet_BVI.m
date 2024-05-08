@@ -62,5 +62,6 @@ hold on
 axis([bl - 0.4, bu + 0.4, node_2_y - 1, node_4_y + 1])
 xline(0, 'LineWidth', 1); 
 yline(0, 'LineWidth', 1);
-
+xlabel('$\lambda_{n, i}$', 'FontSize', 15, 'Interpreter','latex')
+ylabel('$\eta_{n, i}$', 'FontSize', 15, 'Interpreter','latex')
 end
