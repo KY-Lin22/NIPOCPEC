@@ -21,19 +21,17 @@ classdef NLP_Formulation < handle
         J % symbolic function, cost function 
         h % symbolic function, equality constraint    
         c % symbolic function, inequality constraint without relaxation parameter
-        g % symbolic function, inequality constraint with relaxation parameter
-      
+        g % symbolic function, inequality constraint with relaxation parameter      
         Dim % struct, problem dimension record
-        FuncObj % structure, function object
     end
     
     %% Constructor method
     methods
         function self = NLP_Formulation(OCPEC)
             %NLP_Formulation: Construct an instance of this class
-            %   Detailed explanation goes here
-            
-            %% discretize OCPEC into NLP
+            %   Detailed explanation goes here          
+            disp('creating NLP...')
+            %% discretize OCPEC into NLP (MX type)
             nlp = self.createNLP(OCPEC);
             self.z = nlp.z;   
             self.s = nlp.s;
@@ -41,10 +39,7 @@ classdef NLP_Formulation < handle
             self.h = nlp.h;  
             self.c = nlp.c;
             self.g = nlp.g;    
-            self.Dim = nlp.Dim;        
-            
-            %% create function object
-            self.FuncObj = self.createFuncObj(nlp);            
+            self.Dim = nlp.Dim;                
  
             %% display NLP information
             disp('*----------------------------------- NLP Information ------------------------------------*')
@@ -61,8 +56,6 @@ classdef NLP_Formulation < handle
         nlp = createNLP(self, OCPEC)
 
         [constraint_without_param, constraint_with_param] = createRelaxedEquilibriumConstraint(self, OCPEC)
-      
-        FuncObj = createFuncObj(self, nlp)
     end
 end
 

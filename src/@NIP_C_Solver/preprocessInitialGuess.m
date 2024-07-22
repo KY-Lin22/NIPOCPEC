@@ -1,6 +1,6 @@
 function z_Init = preprocessInitialGuess(self, z_Init)
-%UNTITLED7 Summary of this function goes here
-%   preprocess initial guess z_Init
+%UNTITLED5 Summary of this function goes here
+%   Detailed explanation goes here
 import casadi.*
 % load parameter
 xDim = self.OCPEC.Dim.x;
@@ -58,5 +58,5 @@ ETA_Init = full(F_FuncObj_map(X_Init, U_Init, LAMBDA_Init));
 
 %% group and reshape
 z_Init = reshape([X_Init; U_Init; LAMBDA_Init; ETA_Init], [], 1);
-end
 
+end

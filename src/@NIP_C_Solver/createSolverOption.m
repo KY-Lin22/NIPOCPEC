@@ -1,11 +1,6 @@
-function Option = createSolverOption(self)
+function Option = createSolverOption()
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
-%% Basic Option
-Option.printLevel = 2; % 0: print nothing;  
-                       % 1: print results
-                       % 2: print results and iteration log (should specified recordLevel as 1)
-
 %% Option for stage 1: non-interior-point method
 % initialization   
 Option.Init.kappa_bound = 1e-2; % scaling parameter for single bound to evaluate perturbation (default 1e-2)
@@ -27,23 +22,33 @@ Option.RegParam.nu_c = 1e-8; % non-negative definite of diagonal matrix related 
 Option.RegParam.nu_g = 1e-8; % non-negative definite of diagonal matrix related to inequality constraint g
 Option.RegParam.nu_H = 1e-8; % non-positive definite of Hessian matrix
 
+% Lagrangian Hessian approximation
+Option.KKT.Hessian_approximation = 'Gauss_Newton'; % 'Exact', 'Gauss_Newton'
+
 % evaluate search direction
 
 % merit line search
 Option.LineSearch.betaInit = 1; % initial penalty parameter
 Option.LineSearch.rho = 0.1; % desired extend for the negativity of merit function directional derivative
-Option.LineSearch.stepSize_Min = 0.001;
+Option.LineSearch.stepSize_Min = 1e-4;
 Option.LineSearch.stepSize_DecayRate = 0.5;% choose in (0,1)
 Option.LineSearch.nu_D = 1e-4;% desired merit function reduction, default 1e-4
 
 %% Option for stage 2: Euler-Newton continuation method
+% init and end parameter
+Option.Continuation.s_Init = 5e-1;
+Option.Continuation.s_End = 1e-8;
+Option.Continuation.sigma_Init = 1e-1;
+Option.Continuation.sigma_End = 1e-6;
 % update parameter 
-Option.Homotopy.kappa_times = 0.9;
-Option.Homotopy.kappa_exp = 1.1;
-
+Option.Continuation.kappa_times = 0.9;
+Option.Continuation.kappa_exp = 1.1;
+% tolerance
+Option.Continuation.tol.KKT_error = 1e-4;
+Option.Continuation.tol.VI_nat_res = 1e-2;
 % Euler predict step
 
 % Newton correction step
-Option.NewtonCorrection.StepNum = 1;
-end
+Option.Continuation.AdditionNewtonStep = 1;
 
+end

@@ -1,5 +1,5 @@
 function natRes = evaluateNaturalResidual(self, z_Opt)
-%UNTITLED35 Summary of this function goes here
+%UNTITLED9 Summary of this function goes here
 %   Detailed explanation goes here
 import casadi.*
 
@@ -34,6 +34,6 @@ switch self.OCPEC.VISetType
 end
 
 %% evaluate natural residual
-natRes = max(max(abs(LAMBDA_Opt - proj_w_Opt)));
-end
+natRes = reshape(LAMBDA_Opt - proj_w_Opt, [], 1);
 
+end

@@ -37,12 +37,12 @@ while true
 end
 
 % log (time, param, cost, KKT error, natRes)
-Log.param               = zeros(maxHomotopyIter, 1); % s
-Log.cost                = zeros(maxHomotopyIter, 1);
-Log.KKT_error           = zeros(maxHomotopyIter, 3); % [primal, dual_scaled, total]
-Log.VI_natural_residual = zeros(maxHomotopyIter, 1);
-Log.iterNum             = zeros(maxHomotopyIter, 1);
-Log.timeElapsed         = zeros(maxHomotopyIter, 1); % elapsed time in each continuation step
+Log.param      = zeros(maxHomotopyIter, 1); % s
+Log.cost       = zeros(maxHomotopyIter, 1);
+Log.KKT_error  = zeros(maxHomotopyIter, 3); % [primal, dual_scaled, total]
+Log.VI_nat_res = zeros(maxHomotopyIter, 1);
+Log.iterNum    = zeros(maxHomotopyIter, 1);
+Log.time       = zeros(maxHomotopyIter, 1); % elapsed time in each continuation step
 
 %% homotopy loop (j: homotopy counter)
 z_Init_j = z_Init;
@@ -55,7 +55,7 @@ for j = 1 : maxHomotopyIter
         'lbg', [zeros(NLP.Dim.h, 1); zeros(NLP.Dim.c, 1); zeros(NLP.Dim.g, 1)],...
         'ubg', [zeros(NLP.Dim.h, 1); inf*ones(NLP.Dim.c, 1); inf*ones(NLP.Dim.g, 1)]);
     z_Opt_j = full(solution_j.x);
-    VI_nat_res_j = evaluateNaturalResidual_IP(OCPEC, NLP, z_Opt_j);
+    VI_nat_res_j = norm(evaluateNaturalResidual_IP(OCPEC, NLP, z_Opt_j), inf);
     time_j = toc(timeStart_j); 
     
     % step 2: record and print information of the current homotopy iterate
@@ -65,9 +65,9 @@ for j = 1 : maxHomotopyIter
     Log.param(j) = s_j;
     Log.cost(j) = full(solution_j.f);
     Log.KKT_error(j, :) = [KKT_error_primal_j, KKT_error_dual_j, max(KKT_error_primal_j, KKT_error_dual_j)];
-    Log.VI_natural_residual(j) = VI_nat_res_j;
+    Log.VI_nat_res(j) = VI_nat_res_j;
     Log.iterNum(j) = solver.stats.iter_count;
-    Log.timeElapsed(j) = time_j;
+    Log.time(j) = time_j;
     
     if mod(j, 10) == 1
         disp('---------------------------------------------------------------------------------------------------------------------------------------------')
@@ -80,9 +80,9 @@ for j = 1 : maxHomotopyIter
         num2str(Log.cost(j), '%10.2e'),' | ',...
         num2str(Log.KKT_error(j, 1), '%10.2e'),' | ',...
         num2str(Log.KKT_error(j, 2), '%10.2e'),' |  ',...
-        num2str(Log.VI_natural_residual(j), '%10.2e'),'  |   ',...
+        num2str(Log.VI_nat_res(j), '%10.2e'),'  |   ',...
         num2str(Log.iterNum(j), '%10.3d'),'   |  ',...
-        num2str(Log.timeElapsed(j), '%10.4f'),'  | '];
+        num2str(Log.time(j), '%10.4f'),'  | '];
     disp(prevIterMsg)
 
     % step 3: check ternimation based on the current homotopy iterate

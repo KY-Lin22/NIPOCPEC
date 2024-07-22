@@ -34,7 +34,7 @@ switch OCPEC.VISetType
 end
 
 %% evaluate natural residual
-natRes = max(max(abs(LAMBDA_Opt - proj_w_Opt)));
+natRes = reshape(LAMBDA_Opt - proj_w_Opt, [], 1);
 end
 
 
