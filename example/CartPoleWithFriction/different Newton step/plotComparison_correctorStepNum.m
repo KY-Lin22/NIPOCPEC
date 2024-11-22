@@ -9,6 +9,7 @@ continuationStepNum = Data_NIP.rec.Info{1}.continuationStepNum;
 stepAxis = 0 : 1 : continuationStepNum;
 
 figure(1)
+subplot(2, 1, 1)
 semilogy(stepAxis, Data_NIP.rec.Info{1}.Log.VI_nat_res, 'g*-',...
     stepAxis, Data_NIP.rec.Info{2}.Log.VI_nat_res, 'bo-',...
     stepAxis, Data_NIP.rec.Info{3}.Log.VI_nat_res, 'ks-',...
@@ -16,23 +17,20 @@ semilogy(stepAxis, Data_NIP.rec.Info{1}.Log.VI_nat_res, 'g*-',...
 grid on
 legend('NIP (1 corrector step)', 'NIP (2 corrector step)', 'NIP (3 corrector step)', 'IP',...
     'Location','southwest', 'FontSize', 11)
-xlabel('Continuation step', 'FontSize', 11)
-ylabel('VI natural residual (max)', 'FontSize', 11)
+ylabel('Natural residual (max)', 'FontSize', 11)
 
-figure(2)
+subplot(2, 1, 2)
 semilogy(stepAxis, Data_NIP.rec.Info{1}.Log.KKT_error(:, end), 'g*-',...
     stepAxis, Data_NIP.rec.Info{2}.Log.KKT_error(:, end), 'bo-',...
     stepAxis, Data_NIP.rec.Info{3}.Log.KKT_error(:, end), 'ks-',...
     stepAxis, Data_IP.rec.Info.Log.KKT_error(:, end), 'rd-')
 
 grid on
-legend('NIP (1 corrector step)', 'NIP (2 corrector step)', 'NIP (3 corrector step)', 'IP', ...
-    'Location', 'southwest', 'FontSize', 11)
 xlabel('Continuation step', 'FontSize', 11)
 ylabel('KKT total error', 'FontSize', 11)
 
 %
-figure(3)
+figure(2)
 stairs(stepAxis, [Data_NIP.rec.Info{1}.Log.time(2: end); Data_NIP.rec.Info{1}.Log.time(end)], 'g-', 'LineWidth',1.1)
 hold on
 stairs(stepAxis, [Data_NIP.rec.Info{2}.Log.time(2: end); Data_NIP.rec.Info{2}.Log.time(end)], 'b-', 'LineWidth',1.1)

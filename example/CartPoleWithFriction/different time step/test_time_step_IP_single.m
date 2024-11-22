@@ -5,9 +5,9 @@ clc
 timeHorizon = 3;
 nStage_sequence = {60, 300, 600};
 name = {...
-    '$\Delta t = 5 \cdot 10^{-2} (IP)$',...
-    '$\Delta t = 1 \cdot 10^{-2} (IP)$',...
-    '$\Delta t = 5 \cdot 10^{-3} (IP)$'};
+    '$\Delta t = 5 \cdot 10^{-2} (IP single)$',...
+    '$\Delta t = 1 \cdot 10^{-2} (IP single)$',...
+    '$\Delta t = 5 \cdot 10^{-3} (IP single)$'};
 s_Init = 5e-1; 
 s_End = 1e-8; 
 OCPEC_set = cell(1, numel(nStage_sequence));
@@ -23,7 +23,8 @@ for i = 1 : numel(nStage_sequence)
     Prob_i = struct('x', NLP_i.z, 'f', NLP_i.J, 'g', [NLP_i.h; NLP_i.c; NLP_i.g], 'p', NLP_i.s);
     Option_i = struct;
     Option_i.print_time = false;
-    Option_i.ipopt.max_iter = 2000;
+    Option_i.ipopt.max_iter = 10000;
+    % Option_i.ipopt.tol = 1e-4;
     Option_i.ipopt.print_level = 0;
     solver_i = casadi.nlpsol('solver', 'ipopt', Prob_i, Option_i);
     % save
@@ -52,9 +53,9 @@ for i = 1 : numel(nStage_sequence)
     Z_Init_i(NLP_i.Dim.z_Node(1) + 1 : NLP_i.Dim.z_Node(2), :) = randn(OCPEC_i.Dim.u, OCPEC_i.nStages);
     z_Init_i = reshape(Z_Init_i, [], 1);
 
-    [z_Opt_i, Info_i] = solveNLP_IP_homotopy(OCPEC_i, NLP_i, solver_i, z_Init_i, s_Init, s_End);
+    [z_Opt_i, Info_i] = solveNLP_IP_single(OCPEC_i, NLP_i, solver_i, z_Init_i, s_Init, s_End);
     rec.z_Init{i} = z_Init_i;
     rec.z_Opt{i} = z_Opt_i;
     rec.Info{i} = Info_i;
 end
-save('Data_time_step_IP.mat', 'rec')
+save('Data_time_step_IP_single.mat', 'rec')
